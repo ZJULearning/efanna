@@ -1,4 +1,4 @@
-GXX=g++-5 -std=c++11
+GXX=g++ -std=c++11
 OPTM=-O3 -msse2 -msse4 -fopenmp
 CPFLAGS=$(OPTM) -Wall
 LDFLAGS=$(OPTM) -Wall

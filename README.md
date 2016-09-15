@@ -16,32 +16,73 @@ Go to the root directory of EFANNA and make.
 
 How To Use
 ------
-* An easy demo:
+EFANNA uses a composite index to carry out ANN search, which includes an approximate kNN graph and a number of tree structures. They can be built by this library as a whole or seperately.  
+  
+You may build the kNN graph seperately for other use, like other graph based machine learning algorithms.  
+ 
+ Below are some demos.  
+* kNN graph building :
 
-		cd efanna/samples/
-		./sample/efanna\_sample\_kdtreeub sift\_base.fvecs  
-		sift.graph sift\_query.fvecs sift.res 8 8 7 100 4   
-		12 8 100 10
+    cd efanna/samples/
+	./sample/efanna_sample_kdbuildgraph sift_base.fvecs sift.graph 8 8 7 30 25 10 10
 
-* Meaning of the parameters(from left to right):
+ Meaning of the parameters(from left to right):
 
 	sift\_base.fvecs -- database points  
-	sift.graph -- graph built by EFANNA  
-	sift\_query.fvecs -- query points  
-	sift.res -- ANN search results of given query  
+	sift.graph -- graph built by EFANNA   
 	
-	8 -- number of trees used to build the graph  
-	8 -- conquer-to-depeth 
-	7 -- number of iterations to build the graph 
+	8 -- number of trees used to build the graph (larger is more accurate but slower)   
+	8 -- conquer-to-depeth(smaller is more accurate but slower)   
+	8 -- number of iterations to build the graph 
 	 
-	100 -- expansion factor  
-	4 -- number of iterations of ANN search  
-	12 -- search-to-depth of ANN search  
-	8 -- number of trees used in ANN search  
-	100 -- pool size  
-	10 -- required number of nearest neighbors of each query
+	30 -- L (larger is more accurate but slower)  
+	25 -- check (larger is more accurate but slower)  
+	10 -- K, number of neighbors for each point    
+	10 -- S (larger is more accurate but slower)
 	
-See our paper or user manual for more details about the parameters.
+* tree building :   
+    
+        cd efanna/samples/
+		./sample/efanna_sample_kdbuildtree sift_base.fvecs sift.trees 16
+        
+  Meaning of the parameters(from left to right):   
+  
+  sift\_base.fvecs -- database points  
+  sift.trees -- struncated KD-trees built by EFANNA  
+  16 -- number of trees to build
+* ANN search
+        
+        cd efanna/samples/
+		./sample/efanna_sample_kdsearch sift_base.fvecs sift.trees sift.graph sift_query.fvecs sift.results 16 11 4 100 100 10
+  
+  Meaning of the parameters(from left to right):   
+  
+  sift\_base.fvecs -- database points  
+  sift.trees -- prebuilt struncated KD-trees used for search  
+  sift.graph -- prebuilt kNN graph   
+  sift\_query -- sift query points  
+  sift.results -- path to save ANN search results of given query   
+  16 -- number of trees to use (no greater than the number of prebuilt trees)  
+  11 -- search-to-depth (smaller is more accurate but slower)   
+  4 -- number of iterations   
+  100 -- extending factor (larger is more accurate but slower)   
+  100 -- pool size (larger is more accurate but slower)   
+  10 -- required number of returned neighbors   
+  
+See our paper or user manual for more details about the parameters and interfaces.
+
+Output format
+------
+The file format of approximate kNN graph and ANN search results are the same.   
+Suppose the database has N points, and numbered from 0 to N-1. You want to build an approximate kNN graph. The graph can be regarded as a N * k Matrix. The saved kNN graph binary file saves the matrix by row. The first byte of each row saves the value of k, Then it follows k bytes, saving the indices of the k nearest neighbors of respective point. The N rows are saved continuously without seperating characters.   
+
+Similarly, suppose the query data has n points, numbered 0 to n-1. You want EFANNA to return k nearest neighbors for each query. The result file will save n rows like the graph file. It saves the returned indices row by row. Each row starts with a byte recording value of k, and follows k bytes recording neighbors' indices.  
+
+Input of EFANNA
+------
+Because there is no unified format for input data, users may need to write input function to read your own data. You may imitate the input function in our sample code (sample/efanna\_kdtreeall.cc) to load the data into our matrix.
+
+To use SSE instruction optimization, you should pay attention to the data alignment problem of SSE instruction.  
 
 Acknowledgment
 ------
