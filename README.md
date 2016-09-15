@@ -43,6 +43,10 @@ How To Use
 	
 See our paper or user manual for more details about the parameters.
 
+Acknowledgment
+------
+Our code framework imitates [Flann](http://www.cs.ubc.ca/research/flann/) to make it scalable, and the implemnetation of NN-descent is taken from [Kgraph](http://www.kgraph.org). They proposed the NN-descent algorithm. Many thanks to them for inspiration.
+
 What to do
 -------
 * Add OpenMP support for speed-up
