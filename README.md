@@ -33,7 +33,8 @@ Compared Algorithms:
 * [NN-expansion](https://webdocs.cs.ualberta.ca/~abbasiya/gnns.pdf) (the same with GNNS)   
 * [SGraph](http://ieeexplore.ieee.org/document/6247790/) : Scalable k-NN graph construction for visual descriptors  
 * [FastKNN](http://link.springer.com/chapter/10.1007/978-3-642-40991-2_42) : Fast kNN Graph Construction with Locality Sensitive Hashing  
-* [LargeVis](http://dl.acm.org/citation.cfm?id=2883041) : Visualizing Large-scale and High-dimensional Data
+* [LargeVis](http://dl.acm.org/citation.cfm?id=2883041) : Visualizing Large-scale and High-dimensional Data    
+
 How To Complie
 -------
 Go to the root directory of EFANNA and make.
