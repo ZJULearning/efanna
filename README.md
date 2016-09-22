@@ -19,7 +19,7 @@ Compared Algorithms:
 * [kGraph](http://www.kgraph.org)  
 * [flann](http://www.cs.ubc.ca/research/flann/)   
 * [IEH](http://ieeexplore.ieee.org/document/6734715/) : Fast and accurate hashing via iterative nearest neighbors expansion      
-* [GNNS](https://webdocs.cs.ualberta.ca/~abbasiya/gnns.pdf) : Fast Approximate Nearest-Neighbor Search with k-Nearest Neighbor Graph
+* [GNNS](https://webdocs.cs.ualberta.ca/~abbasiya/gnns.pdf) : Fast Approximate Nearest-Neighbor Search with k-Nearest Neighbor Graph    
 kNN Graph Construction Performance
 ------
 The performance was tested without parallelism.
