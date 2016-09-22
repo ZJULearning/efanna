@@ -29,8 +29,8 @@ The performance was tested without parallelism.
 ![SIFT100nnGraph](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/GIST_graph.png)   
 
 Compared Algorithms:   
-* [Kgraph](http://www.kgraph.org) (the same with NN-descent)   
-* [NN-expansion](https://webdocs.cs.ualberta.ca/~abbasiya/gnns.pdf) (the same with GNNS)   
+* [Kgraph](http://www.kgraph.org) (same with NN-descent)   
+* [NN-expansion](https://webdocs.cs.ualberta.ca/~abbasiya/gnns.pdf) (same with GNNS)   
 * [SGraph](http://ieeexplore.ieee.org/document/6247790/) : Scalable k-NN graph construction for visual descriptors  
 * [FastKNN](http://link.springer.com/chapter/10.1007/978-3-642-40991-2_42) : Fast kNN Graph Construction with Locality Sensitive Hashing  
 * [LargeVis](http://dl.acm.org/citation.cfm?id=2883041) : Visualizing Large-scale and High-dimensional Data    
