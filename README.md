@@ -7,6 +7,31 @@ Benchmark data set
 -------
 * [SIFT1M and GIST1M](http://corpus-texmex.irisa.fr/)
 
+ANN search performance
+------
+The performance was tested without parallelism.   
+
+![SIFT1nn](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/SIFT_1nn.png)    
+![SIFT100nn](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/SIFT_100nn.png)    
+![GIST1nn](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/GIST_1nn.png)    
+![GIST100nn](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/GIST_100nn.png)   
+Compared Algorithms:   
+* [kGraph](http://www.kgraph.org)  
+* [flann](http://www.cs.ubc.ca/research/flann/)   
+* [IEH](http://ieeexplore.ieee.org/document/6734715/) : Fast and accurate hashing via iterative nearest neighbors expansion      
+* [GNNS](https://webdocs.cs.ualberta.ca/~abbasiya/gnns.pdf) : Fast Approximate Nearest-Neighbor Search with k-Nearest Neighbor Graph
+kNN Graph Construction Performance
+------
+The performance was tested without parallelism.
+![SIFT1nnGraph](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/SIFT_graph.png)    
+![SIFT100nnGraph](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/GIST_graph.png) 
+
+Compared Algorithms:   
+* [Kgraph](http://www.kgraph.org) (the same with NN-descent)   
+* [NN-expansion](https://webdocs.cs.ualberta.ca/~abbasiya/gnns.pdf) (the same with GNNS)   
+* [SGraph](http://ieeexplore.ieee.org/document/6247790/) : Scalable k-NN graph construction for visual descriptors  
+* [FastKNN](http://link.springer.com/chapter/10.1007/978-3-642-40991-2_42) : Fast kNN Graph Construction with Locality Sensitive Hashing  
+* [LargeVis](http://dl.acm.org/citation.cfm?id=2883041) : Visualizing Large-scale and High-dimensional Data
 How To Complie
 -------
 Go to the root directory of EFANNA and make.
