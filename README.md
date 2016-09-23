@@ -89,7 +89,7 @@ You may build the kNN graph seperately for other use, like other graph based mac
    sift\_base.fvecs -- database points  
    sift.trees -- struncated KD-trees built by EFANNA  
    8 -- number of trees for building index   
-   8 -- conquer-to-depth
+   8 -- conquer-to-depth    
    8 -- iteration number    
    
 * ANN search
