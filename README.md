@@ -51,9 +51,10 @@ You may build the kNN graph seperately for other use, like other graph based mac
  Below are some demos.  
 * kNN graph building :
 
-    cd efanna/samples/
-	./sample/efanna_sample_kdbuildgraph sift_base.fvecs sift.graph 8 8 7 30 25 10 10
-
+    	cd efanna/samples/
+		./sample/efanna_index_buildgraph sift_base.fvecs sift.graph 8 8 7 30 25 10 10
+		  
+		  
  Meaning of the parameters(from left to right):
 
 	sift\_base.fvecs -- database points  
@@ -71,13 +72,26 @@ You may build the kNN graph seperately for other use, like other graph based mac
 * tree building :   
     
         cd efanna/samples/
-		./sample/efanna_sample_kdbuildtree sift_base.fvecs sift.trees 16
+		./sample/efanna_index_buildtree sift_base.fvecs sift.trees 16
         
   Meaning of the parameters(from left to right):   
   
   sift\_base.fvecs -- database points  
   sift.trees -- struncated KD-trees built by EFANNA  
-  16 -- number of trees to build
+  16 -- number of trees to build   
+* index building in one file:   
+  
+  		cd efanna/samples/
+		./sample/efanna_index sift_base.fvecs sift.index 8 8 8
+   
+	Meaning of the parameters(from left to right)   
+	
+   sift\_base.fvecs -- database points  
+   sift.trees -- struncated KD-trees built by EFANNA  
+   8 -- number of trees for building index   
+   8 -- conquer-to-depth
+   8 -- iteration number    
+   
 * ANN search
         
         cd efanna/samples/
