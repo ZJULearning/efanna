@@ -6,7 +6,7 @@ EFANNA is also flexible to adopt all kinds of hierarchical structure for initial
 
 What's new
 -------
-OpenMP supported! kNN graph building on SIFT1M achieves 97.5% accuracy within 45 seconds!     
+OpenMP supported! kNN graph building on SIFT1M achieves 97.5% accuracy within 45 seconds (on a machine with intel i7-4790K CPU)!     
 
 Benchmark data set
 -------
