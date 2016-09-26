@@ -44,7 +44,7 @@ int main(int argc, char** argv){
   unsigned int trees = atoi(argv[3]);
   //srand(time(NULL));
   //FIndex<float> index(dataset, new L2DistanceSSE<float>(), efanna::KDTreeUbIndexParams(true, trees ,mlevel ,epochs,checkK,L, 10));
-  FIndex<float> index(dataset, new L2Distance<float>(), efanna::KDTreeUbIndexParams(true, trees , 10 ,10, 10, 10, 10));
+  FIndex<float> index(dataset, new L2DistanceSSE<float>(), efanna::KDTreeUbIndexParams(true, trees , 10 ,10, 10, 10, 10));
 
   clock_t s,f;
   s = clock();

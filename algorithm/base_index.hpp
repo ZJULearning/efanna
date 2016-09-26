@@ -7,10 +7,19 @@
 #include <boost/dynamic_bitset.hpp>
 #include <fstream>
 #include <iostream>
+#include <omp.h>
+#include <unordered_set>
+#include <mutex>
+#include "boost/smart_ptr/detail/spinlock.hpp"
+
+
 
 //#define BATCH_SIZE 200
 
 namespace efanna{
+
+  typedef boost::detail::spinlock Lock;
+  typedef std::lock_guard<Lock> LockGuard;
   struct Point {
         unsigned id;
         float dist;
@@ -51,7 +60,7 @@ namespace efanna{
         return i;
     }
   struct Neighbor {
-
+        Lock lock;
         float radius;
         float radiusM;
         Points pool;
@@ -64,7 +73,7 @@ namespace efanna{
         std::vector<unsigned> rnn_new;
         unsigned insert (unsigned id, float dist) {
             if (dist > radius) return pool.size();
-
+            LockGuard guard(lock);
             unsigned l = InsertIntoKnn(&pool[0], L, Point(id, dist, true));
             if (l <= L) {
                 if (L + 1 < pool.size()) {
@@ -76,6 +85,20 @@ namespace efanna{
             }
             return l;
         }
+
+        template <typename C>
+            void join (C callback) const {
+                for (unsigned const i: nn_new) {
+                    for (unsigned const j: nn_new) {
+                        if (i < j) {
+                            callback(i, j);
+                        }
+                    }
+                    for (unsigned j: nn_old) {
+                        callback(i, j);
+                    }
+                }
+            }
 
       };
 
@@ -295,9 +318,12 @@ SearchParams SP;
     std::vector<Neighbor>  nhoods;
     void join(){
       size_t dim = features_.get_cols();
+      size_t cc = 0;
+#pragma omp parallel for default(shared) schedule(dynamic, 100) reduction(+:cc)
       for(size_t i = 0; i < nhoods.size(); i++){
         size_t uu = 0;
         nhoods[i].found = false;
+/*
         for(size_t newi = 0; newi < nhoods[i].nn_new.size(); newi++){
           for(size_t newj = newi+1; newj < nhoods[i].nn_new.size(); newj++){
             unsigned a = nhoods[i].nn_new[newi];
@@ -319,6 +345,17 @@ SearchParams SP;
             nhoods[b].insert(a,dist);
           }
         }
+*/
+	nhoods[i].join([&](unsigned i, unsigned j) {
+		DataType dist = distance_->compare(
+              		features_.get_row(i), features_.get_row(j), dim);
+		++cc;
+		unsigned r;
+		r = nhoods[i].insert(j, dist);
+		if (r < params_.Check_K) ++uu;
+		nhoods[j].insert(i, dist);
+		if (r < params_.Check_K) ++uu;
+	});
         nhoods[i].found = uu > 0;
       }
 
@@ -333,6 +370,7 @@ SearchParams SP;
           nhoods[i].radius = nhoods[i].pool.back().dist;
       }
       //find longest new
+#pragma omp parallel for
       for(size_t i = 0; i < nhoods.size(); i++){
         if(nhoods[i].found){
           unsigned maxl = nhoods[i].Range + params_.S < nhoods[i].L ? nhoods[i].Range + params_.S : nhoods[i].L;
@@ -346,6 +384,7 @@ SearchParams SP;
         }
         nhoods[i].radiusM = nhoods[i].pool[nhoods[i].Range-1].dist;
       }
+#pragma omp parallel for
       for (unsigned n = 0; n < nhoods.size(); ++n) {
           Neighbor &nhood = nhoods[n];
           std::vector<unsigned> &nn_new = nhood.nn_new;
@@ -356,6 +395,7 @@ SearchParams SP;
               if (nn.flag) {
                   nn_new.push_back(nn.id);
                   if (nn.dist > nhood_o.radiusM) {
+                      LockGuard guard(nhood_o.lock);
                       nhood_o.rnn_new.push_back(n);
                   }
                   nn.flag = false;
@@ -363,6 +403,7 @@ SearchParams SP;
               else {
                   nn_old.push_back(nn.id);
                   if (nn.dist > nhood_o.radiusM) {
+                      LockGuard guard(nhood_o.lock);
                       nhood_o.rnn_old.push_back(n);
                   }
               }
@@ -424,7 +465,7 @@ protected:
     std::vector<std::vector<int>> knn_table_gt;
     //std::vector<std::vector<int>> knn_graph;
     std::vector<CandidateHeap> knn_graph;
-    std::vector<CandidateHeap> NewCands;
+    std::vector<Lock> Locks;
     std::vector<IndexVec> nn_new;
     std::vector<IndexVec> nn_old;
     std::vector<IndexVec> rnn_new;
@@ -445,6 +486,7 @@ protected:
     using InitIndex<DataType>::nhoods;\
     using InitIndex<DataType>::SP;\
     using InitIndex<DataType>::nnExpansion;\
-    using InitIndex<DataType>::nnExpansion_kgraph;
+    using InitIndex<DataType>::nnExpansion_kgraph;\
+    using InitIndex<DataType>::Locks;
 }
 #endif

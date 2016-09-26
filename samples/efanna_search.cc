@@ -27,34 +27,35 @@ if(dim!=cols)cout<<"data align to dimension "<<cols<<" for sse2 inst"<<endl;
   in.close();
 }
 int main(int argc, char** argv){
-  if(argc!=10){cout<< argv[0] << " data_file save_graph_file trees level epoch L K kNN S" <<endl; exit(-1);}
+  if(argc!=12){cout<< argv[0] << " data_file tree_index graph_index query_file result_file tree lv epoch initsz extend querNN" <<endl; exit(-1);}
 
   float* data_load = NULL;
-  //float* query_load = NULL;
+  float* query_load = NULL;
   size_t points_num;
   int dim;
   load_data(argv[1], data_load, points_num,dim);
-  //size_t q_num;
-  //int qdim;
-  //load_data(argv[3], query_load, q_num,qdim);
+  size_t q_num;
+  int qdim;
+  load_data(argv[4], query_load, q_num,qdim);
   Matrix<float> dataset(points_num,dim,data_load);
-  //Matrix<float> query(q_num,qdim,query_load);
+  Matrix<float> query(q_num,qdim,query_load);
 
-  unsigned int trees = atoi(argv[3]);
-  int mlevel = atoi(argv[4]);
-  unsigned int epochs = atoi(argv[5]);
-  int L = atoi(argv[6]);
-  int checkK = atoi(argv[7]);
-  int kNN = atoi(argv[8]);
-  int S = atoi(argv[9]);
-  //srand(time(NULL));
-  FIndex<float> index(dataset, new L2Distance<float>(), efanna::KDTreeUbIndexParams(true, trees ,mlevel ,epochs,checkK,L, kNN, trees, S));
+  FIndex<float> index(dataset, new L2DistanceSSE<float>(), efanna::KDTreeUbIndexParams(true, 8 ,8 ,10,25,30,10));
+  index.loadTrees(argv[2]);
+  index.loadGraph(argv[3]);
+
+  int search_trees = atoi(argv[6]);
+  int search_lv = atoi(argv[7]);
+  int search_epoc = atoi(argv[8]);
+  int poolsz = atoi(argv[9]);
+  int search_extend = atoi(argv[10]);
+  index.setSearchParams(search_epoc, poolsz, search_extend, search_trees,search_lv);
+
   clock_t s,f;
   s = clock();
-  index.buildIndex();
-
+  index.knnSearch(atoi(argv[11])/*query nn*/,query);
   f = clock();
-  cout<<"Index building time : "<<(f-s)*1.0/CLOCKS_PER_SEC<<" seconds"<<endl;
-  index.saveGraph(argv[2]);
+  cout<<"Query searching time : "<<(f-s)*1.0/CLOCKS_PER_SEC<<" seconds"<<endl;
+  index.saveResults(argv[5]);
   return 0;
 }

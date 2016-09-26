@@ -1,7 +1,12 @@
-EFANNA:an Extreme Fast Approximate Nearest Neighbor search Algorithm
+EFANNA:an Extreme Fast Approximate Nearest Neighbor search Algorithm framework based on kNN graph
 ============
 EFANNA is a ***flexible*** and ***efficient*** library for approximate nearest neighbor search (ANN search) on large scale data. It implements the algorithms of our paper [EFANNA : Extremely Fast Approximate Nearest Neighbor Search Algorithm Based on kNN Graph](https://www.baidu.com).
-EFANNA provides fast solutions on ***approximate nearest neighbor graph construction*** and ***ANN search*** based on the prebuilt graph. And it achieves best performance on million scale data.
+EFANNA provides fast solutions on ***approximate nearest neighbor graph construction*** and ***ANN search*** based on the prebuilt graph. And it achieves best performance on million scale data.   
+EFANNA is also flexible to adopt all kinds of hierarchical structure for initialization, such as random projection tree, hierarchical clustering tree, multi-table hashing and so on.   
+
+What's new
+-------
+OpenMP supported! kNN graph building on SIFT1M achieves 97.5% accuracy within 45 seconds!     
 
 Benchmark data set
 -------
@@ -79,18 +84,24 @@ You may build the kNN graph seperately for other use, like other graph based mac
   sift\_base.fvecs -- database points  
   sift.trees -- struncated KD-trees built by EFANNA  
   16 -- number of trees to build   
-* index building in one file:   
+* index building at one time:   
   
   		cd efanna/samples/
-		./sample/efanna_index sift_base.fvecs sift.index 8 8 8
+		./sample/efanna_index sift_base.fvecs sift.trees sitf.graph 16 8 8 30 25 10 10 8
    
 	Meaning of the parameters(from left to right)   
 	
    sift\_base.fvecs -- database points  
    sift.trees -- struncated KD-trees built by EFANNA  
-   8 -- number of trees for building index   
+   sift.graph --
+   16 -- number of trees in total for building index   
    8 -- conquer-to-depth    
    8 -- iteration number    
+   30 -- L   
+   25 -- check    
+   10 -- K    
+   10 -- S   
+   8 -- 8 trees out of 16 are used for building graph
    
 * ANN search
         
@@ -132,5 +143,4 @@ Our code framework imitates [Flann](http://www.cs.ubc.ca/research/flann/) to mak
 
 What to do
 -------
-* Add OpenMP support for speed-up
 * Add more initial algorithm choice	
