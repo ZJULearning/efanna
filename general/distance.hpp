@@ -35,6 +35,12 @@ struct Candidate {
         }
         return this->distance > rhs.distance;
     }
+    bool operator <(const Candidate& rhs) const {
+        if (this->distance == rhs.distance) {
+            return this->row_id < rhs.row_id;
+        }
+        return this->distance < rhs.distance;
+    }
 };
 
 template<typename T>

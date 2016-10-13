@@ -29,15 +29,14 @@ if(dim!=cols)cout<<"data align to dimension "<<cols<<" for sse2 inst"<<endl;
 int main(int argc, char** argv){
   if(argc!=12){cout<<"arguments error"<<endl; exit(-1);}
   float* data_load = NULL;
-  float* query_load = NULL;
   size_t points_num;
   int dim;
   load_data(argv[1], data_load, points_num,dim);
-  size_t q_num;
-  int qdim;
+  //size_t q_num;
+  //int qdim;
   //load_data(argv[3], query_load, q_num,qdim);
   Matrix<float> dataset(points_num,dim,data_load);
-  Matrix<float> query(q_num,qdim,query_load);
+  //Matrix<float> query(q_num,qdim,query_load);
 
   unsigned int trees = atoi(argv[4]);
   int mlevel = atoi(argv[5]);
@@ -47,13 +46,13 @@ int main(int argc, char** argv){
   int kNN = atoi(argv[9]);
   int S = atoi(argv[10]);
   int buildtrees = atoi(argv[11]);
-  FIndex<float> index(dataset, new L2DistanceSSE<float>(), efanna::KDTreeUbIndexParams(true, trees ,mlevel ,epochs,checkK,L,KNN, buildtrees, S));
-  clock_t s,f;
-  s = clock();
+  FIndex<float> index(dataset, new L2DistanceSSE<float>(), efanna::KDTreeUbIndexParams(true, trees ,mlevel ,epochs,checkK,L,kNN, buildtrees, S));
+  time_t s,f;
+  s = time(NULL);
   index.buildIndex();
 
-  f = clock();
-  cout<<"Index building time : "<<(f-s)*1.0/CLOCKS_PER_SEC<<" seconds"<<endl;
+  f = time(NULL);
+  cout<<"Index building time : "<<(f-s)<<" seconds"<<endl;
   //index.saveIndex(argv[2]);
   //index.loadIndex(argv[2]);
   index.saveTrees(argv[2]);

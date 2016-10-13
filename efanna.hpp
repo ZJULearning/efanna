@@ -56,6 +56,12 @@ namespace efanna{
       void setSearchParams(int epochs, int init_num, int extend_to, int search_trees = 0, int search_lv=-1){
         initIndex_->setSearchParams(epochs, init_num, extend_to,search_trees, search_lv);
       }
+      size_t getGraphSize(){
+	return initIndex_->getGraphSize();
+      }
+      std::vector<unsigned> getGraphRow(unsigned row_id){
+	return initIndex_->getGraphRow(row_id);
+      }
       private:
           /** Pointer to actual index class */
           IndexType* initIndex_;

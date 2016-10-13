@@ -55,7 +55,7 @@ int main(int argc, char** argv){
   s = clock();
   index.knnSearch(atoi(argv[11])/*query nn*/,query);
   f = clock();
-  cout<<"Query searching time : "<<(f-s)*1.0/CLOCKS_PER_SEC<<" seconds"<<endl;
+  cout<<"Query searching time : "<<(f-s) * 1.0 / CLOCKS_PER_SEC<<" seconds"<<endl;
   index.saveResults(argv[5]);
   return 0;
 }

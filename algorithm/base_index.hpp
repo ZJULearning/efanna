@@ -432,7 +432,7 @@ SearchParams SP;
       clock_t s,f;
       s = clock();unsigned int l=100;
       while(iter++ < params_.build_epoches){
-        join();
+        join();//std::cout<<"after join"<<std::endl;
         update(l);
         f = clock();
         std::cout << "iteration "<< iter << " time: "<< (f-s)*1.0/CLOCKS_PER_SEC<<" seconds"<< std::endl;
@@ -458,6 +458,15 @@ SearchParams SP;
     }
 typedef std::set<Candidate<DataType>, std::greater<Candidate<DataType>> > CandidateHeap;
 typedef std::vector<unsigned int> IndexVec;
+    size_t getGraphSize(){return knn_graph.size();}
+    std::vector<unsigned> getGraphRow(unsigned row_id){
+	std::vector<unsigned> row;
+	if(knn_graph.size() > row_id){
+	    typename CandidateHeap::reverse_iterator it = knn_graph[row_id].rbegin();
+	    for(; it != knn_graph[row_id].rend(); it++)row.push_back(it->row_id);
+	}
+	return row;
+    }
 protected:
     const Matrix<DataType> features_;
     const Distance<DataType>* distance_;

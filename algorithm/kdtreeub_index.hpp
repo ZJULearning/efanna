@@ -272,39 +272,59 @@ Node* SearchQueryInTree(Node* node, size_t id, const Matrix<DataType>& query, in
         return node;
 
     }
-
-  void getNeighbors(size_t k, const Matrix<DataType>& query){
+void getSearchNodeList(Node* node, size_t id, const Matrix<DataType>& query, int depth, std::vector<Node*>& vn){
+    if(node->Lchild != NULL && node->Rchild !=NULL){
+	depth++;
+	if(query.get_row(id)[node->DivDim] < node->DivVal){
+	    getSearchNodeList(node->Lchild, id, query, depth, vn);
+	    if(depth > SP.search_depth)vn.push_back(node->Rchild);
+	}else{
+	    getSearchNodeList(node->Rchild, id, query, depth, vn);
+	    if(depth > SP.search_depth)vn.push_back(node->Lchild);
+	}
+    }else
+	vn.push_back(node);
+}
+  void getNeighbors_p1(size_t k, const Matrix<DataType>& query){
       std::cout<<"using tree num "<< SP.tree_num<<std::endl;
       if(SP.tree_num > tree_roots_.size()){
         std::cout<<"wrong tree number"<<std::endl;return;
       }
 
-      boost::dynamic_bitset<> tbflag(features_.get_rows(), false);
-      boost::dynamic_bitset<> newflag(features_.get_rows(), false);
 
       nn_results.clear();
+//clock_t tt=0;
+if(SP.search_depth<0){std::cout<<"error search depth"<<std::endl;return;}
 
+
+nn_results.resize(query.get_rows());
+#pragma omp parallel for
       for(unsigned int cur = 0; cur < query.get_rows(); cur++){
 
         CandidateHeap Candidates;
+  	boost::dynamic_bitset<> tbflag(features_.get_rows(), false);
+      	boost::dynamic_bitset<> newflag(features_.get_rows(), false);
         tbflag.reset();
         newflag.reset();
 
+
        for(unsigned int i = 0; i < SP.tree_num; i++){
-         if(SP.search_depth<0)break;
+         
          Node* leafn = SearchQueryInTree(tree_roots_[i], cur, query, 0);
          for(size_t j = leafn->StartIdx; j < leafn->EndIdx; j++){
             size_t nn = LeafLists[i][j];
 
             if(tbflag.test(nn))continue;
             else{ tbflag.set(nn); newflag.set(nn);}
+	    DataType dist = distance_->compare(
+              query.get_row(cur), features_.get_row(nn), features_.get_cols());
+	    if(Candidates.size() < (unsigned int)SP.search_init_num || dist < Candidates.begin()->distance){
+                Candidate<DataType> c(nn, dist);
+  		Candidates.insert(c);
+                if(Candidates.size() > (unsigned int)SP.search_init_num)
+              		Candidates.erase(Candidates.begin());
+	    }
 
-            Candidate<DataType> c(nn, distance_->compare(
-              query.get_row(cur), features_.get_row(nn), features_.get_cols())
-            );
-            Candidates.insert(c);
-            if(Candidates.size() > (unsigned int)SP.search_init_num)
-              Candidates.erase(Candidates.begin());
          }
        }
        int base_n = features_.get_rows();
@@ -321,7 +341,8 @@ Node* SearchQueryInTree(Node* node, size_t id, const Matrix<DataType>& query, in
           Candidates.insert(c);
        }
 
-
+//clock_t s,f;
+//s = clock();
        int iter=0;
          std::vector<int> ids;
          while(iter++ < SP.search_epoches){
@@ -354,61 +375,251 @@ Node* SearchQueryInTree(Node* node, size_t id, const Matrix<DataType>& query, in
            }
          }
          typename CandidateHeap::reverse_iterator it = Candidates.rbegin();
-         std::vector<int> res;
+         std::vector<int>& res = nn_results[cur];
          for(size_t i = 0; i < k && it != Candidates.rend();i++, it++)
             res.push_back(it->row_id);
-         nn_results.push_back(res);
 
+         //nn_results.push_back(res);
+
+//f = clock();tt += f-s;
+      }//std::cout<<tt*1.0/CLOCKS_PER_SEC<<std::endl;
+  }
+
+void getNeighbors_p2(size_t searchK, const Matrix<DataType>& query){
+      std::cout<<"using tree num "<< SP.tree_num<<std::endl;
+      if(SP.tree_num > tree_roots_.size()){
+        std::cout<<"wrong tree number"<<std::endl;return;
+      }
+
+      nn_results.clear();
+
+      if(SP.search_depth<0){std::cout<<"error search depth"<<std::endl;return;}
+      nn_results.resize(query.get_rows());
+#pragma omp parallel for
+      for(unsigned int cur = 0; cur < query.get_rows(); cur++){
+	  std::vector<Point> knn(10 + 100 +1);
+	  std::vector<Point> results;
+	  std::mt19937 rng(1998);
+	  boost::dynamic_bitset<> flags(features_.get_rows(), false);
+	  std::vector<unsigned> search_area;
+	  for(unsigned int i = 0; i < SP.tree_num; i++){
+          	Node* leafn = SearchQueryInTree(tree_roots_[i], cur, query, 0);
+		for(size_t j = leafn->StartIdx; j < leafn->EndIdx; j++){
+            	    size_t nn = LeafLists[i][j];
+		    if(!flags[nn]){flags.set(nn);search_area.push_back(nn);}
+		}
+	  }
+	  flags.reset();
+
+	  for (unsigned iter = 0; iter < (unsigned)SP.search_epoches; ++iter) {
+                unsigned L = 0;
+                if (L == 0) {   
+                    std::vector<unsigned> random(100);
+                    GenRandom(rng, &random[0], random.size(), features_.get_rows());
+/*                    for (unsigned s: random) {
+                        if (!flags[s]) {
+                            knn[L++].id = s;
+                        }
+                    }*/
+		    for (unsigned s = iter*100; s < iter*100+100; s++) {
+                        if (!flags[search_area[s]]) {
+                            knn[L++].id = search_area[s];
+                        }
+                    }
+                }
+               
+                for (unsigned k = 0; k < L; ++k) {
+                    flags[knn[k].id] = true;
+                    knn[k].flag = true;
+                    knn[k].dist = distance_->compare(
+                 	query.get_row(cur), features_.get_row(knn[k].id), features_.get_cols());
+                }
+                std::sort(knn.begin(), knn.begin() + L);
+
+                unsigned k =  0;
+                while (k < L) {
+                    unsigned nk = L;
+                    if (knn[k].flag) {
+                        knn[k].flag = false;
+                        unsigned n = knn[k].id;
+                        
+                        //unsigned maxM = knn_graph[knn[k].id].size();
+			typename CandidateHeap::reverse_iterator neighbor = knn_graph[n].rbegin();
+                        
+                        
+                        for (; neighbor != knn_graph[n].rend(); neighbor++) {
+                            unsigned id = neighbor->row_id;
+                            
+                            if (flags[id]) continue;
+                            flags[id] = true;
+                            
+                            float dist = distance_->compare(
+                 		query.get_row(cur), features_.get_row(id), features_.get_cols());
+                            Point nn(id, dist);
+                            unsigned r = InsertIntoKnn(&knn[0], L, nn);
+                            
+                            
+                            if (L + 1 < knn.size()) ++L;
+                            if (r < nk) {
+                                nk = r;
+                            }
+                        }
+                    }
+                    if (nk <= k) {
+                        k = nk;
+                    }
+                    else {
+                        ++k;
+                    }
+                }
+                if (L > searchK) L = searchK;
+                if (results.empty()) {
+                    results.reserve(searchK + 1);
+                    results.resize(L + 1);
+                    std::copy(knn.begin(), knn.begin() + L, results.begin());
+                }
+                else {
+                    
+                    for (unsigned l = 0; l < L; ++l) {
+                        unsigned r = InsertIntoKnn(&results[0], results.size() - 1, knn[l]);
+                        if (r < results.size() /* inserted */ && results.size() < (searchK + 1)) {
+                            results.resize(results.size() + 1);
+                        }
+                    }
+                }
+            }
+	std::vector<int>& res = nn_results[cur];
+        for(size_t i = 0; i < searchK ;i++)
+            res.push_back(results[i].id);
       }
   }
 
-  void getNeighbors_version2(size_t K, const Matrix<DataType>& query){
-        std::cout<<"using tree num "<< SP.tree_num<<std::endl;
-        if(SP.tree_num > tree_roots_.size()){
-          std::cout<<"wrong tree number"<<std::endl;return;
-        }
+void getNeighbors(size_t searchK, const Matrix<DataType>& query){
+      std::cout<<"using tree num "<< SP.tree_num<<std::endl;
+      if(SP.tree_num > tree_roots_.size()){
+        std::cout<<"wrong tree number"<<std::endl;return;
+      }
 
-        boost::dynamic_bitset<> tbflag(features_.get_rows(), false);
+      nn_results.clear();
 
-        nn_results.clear();
+      if(SP.search_depth<0){std::cout<<"error search depth"<<std::endl;return;}
+      nn_results.resize(query.get_rows());
+#pragma omp parallel for
+      for(unsigned int cur = 0; cur < query.get_rows(); cur++){
+	  std::vector<Point> knn(searchK + SP.extend_to +1);
+	  std::vector<Point> results;
+	  std::mt19937 rng(1998);
+	  boost::dynamic_bitset<> flags(features_.get_rows(), false);
+	  std::vector<unsigned> search_area;
+	  std::vector<std::vector<Node*> > Vnl;
+	  Vnl.resize(SP.tree_num);
+	  for(unsigned int i = 0; i < SP.tree_num; i++){
+          	getSearchNodeList(tree_roots_[i], cur, query, 0, Vnl[i]);		
+	  }
 
-        for(unsigned int cur = 0; cur < query.get_rows(); cur++){
+	  bool b = true;
+	  unsigned tmp = 0;
+	  while(b){
+	      b = false;
+	      for(unsigned i = 0; i < Vnl.size(); i++){
+		  if(tmp < Vnl[i].size()){
+		      b = true;
+		      Node* n = Vnl[i][tmp];
+		      for(unsigned j = n->StartIdx; j < n->EndIdx; j++){
+			  size_t nid = LeafLists[i][j];
+			  if(!flags[nid]){flags.set(nid);search_area.push_back(nid);}
+		      }
+		  }
+	      }
+	      tmp++;
+	  }
+	  
+	  flags.reset();
 
-           	std::vector<unsigned int> pool;
-            tbflag.reset();
+	  for (unsigned iter = 0; iter < (unsigned)SP.search_epoches; ++iter) {
+  		unsigned L=0;
+            	//std::vector<unsigned> random(100);
+           	//GenRandom(rng, &random[0], random.size(), features_.get_rows());
+	    	unsigned st = iter*SP.extend_to;
+	    	unsigned ed = iter*SP.extend_to+SP.extend_to;
+	    	if(search_area.size() < ed){
+		    std::vector<unsigned> random(SP.extend_to);
+           	    GenRandom(rng, &random[0], random.size(), features_.get_rows());
+		    std::copy(random.begin(),random.end(),std::back_inserter(search_area));
+		}
 
-           for(unsigned int i = 0; i < SP.tree_num; i++){
-             if(SP.search_depth<0)break;
-             Node* leafn = SearchQueryInTree(tree_roots_[i], cur, query, 0);
-             for(size_t j = leafn->StartIdx; j < leafn->EndIdx; j++){
-                size_t nn = LeafLists[i][j];
+	    	for (unsigned s = st; s < ed; s++) {
+              	    if (!flags[search_area[s]]) {
+                        knn[L++].id = search_area[s];
+                    }
+                }
 
-                if(tbflag.test(nn))continue;
-                tbflag.set(nn);
+               
+                for (unsigned k = 0; k < L; ++k) {
+                    flags[knn[k].id] = true;
+                    knn[k].flag = true;
+                    knn[k].dist = distance_->compare(
+                 	query.get_row(cur), features_.get_row(knn[k].id), features_.get_cols());
+                }
+                std::sort(knn.begin(), knn.begin() + L);
 
-                pool.push_back(nn);
-
-             }
-           }
-
-           int base_n = features_.get_rows();
-
-           while(pool.size() < (unsigned int)SP.search_init_num){
-                unsigned int nn = rand() % base_n;
-
-                if(tbflag.test(nn))continue;
-                tbflag.set(nn);
-                pool.push_back(nn);
-           }
-           SP.search_init_num = pool.size();
-
-           std::vector<int> res;
-           nnExpansion(K, query.get_row(cur), pool, res);
-           nn_results.push_back(res);
-
-        }
-}
-
+                unsigned k =  0;
+                while (k < L) {
+                    unsigned nk = L;
+                    if (knn[k].flag) {
+                        knn[k].flag = false;
+                        unsigned n = knn[k].id;
+                        
+                        //unsigned maxM = knn_graph[knn[k].id].size();
+			typename CandidateHeap::reverse_iterator neighbor = knn_graph[n].rbegin();
+                        
+                        
+                        for (; neighbor != knn_graph[n].rend(); neighbor++) {
+                            unsigned id = neighbor->row_id;
+                            
+                            if (flags[id]) continue;
+                            flags[id] = true;
+                            
+                            float dist = distance_->compare(
+                 		query.get_row(cur), features_.get_row(id), features_.get_cols());
+                            Point nn(id, dist);
+                            unsigned r = InsertIntoKnn(&knn[0], L, nn);
+                            
+                            
+                            if (L + 1 < knn.size()) ++L;
+                            if (r < nk) {
+                                nk = r;
+                            }
+                        }
+                    }
+                    if (nk <= k) {
+                        k = nk;
+                    }
+                    else {
+                        ++k;
+                    }
+                }
+                if (L > searchK) L = searchK;
+                if (results.empty()) {
+                    results.reserve(searchK + 1);
+                    results.resize(L + 1);
+                    std::copy(knn.begin(), knn.begin() + L, results.begin());
+                }
+                else {
+                    
+                    for (unsigned l = 0; l < L; ++l) {
+                        unsigned r = InsertIntoKnn(&results[0], results.size() - 1, knn[l]);
+                        if (r < results.size() /* inserted */ && results.size() < (searchK + 1)) {
+                            results.resize(results.size() + 1);
+                        }
+                    }
+                }
+            }
+	std::vector<int>& res = nn_results[cur];
+        for(size_t i = 0; i < searchK ;i++)
+            res.push_back(results[i].id);
+      }
+  }
     int DepthFirstWrite(std::fstream& out, struct Node *root){
       if(root==NULL) return 0;
     	int left_cnt = DepthFirstWrite(out, root->Lchild);
@@ -693,7 +904,6 @@ Node* SearchQueryInTree(Node* node, size_t id, const Matrix<DataType>& query, in
       unsigned lim1, lim2;
 
       planeSplit(indices, count, cutdim, cutval, lim1, lim2);
-
       //cut the subtree using the id which best balances the tree
       if (lim1>count/2) index = lim1;
       else if (lim2<count/2) index = lim2;
@@ -703,11 +913,13 @@ Node* SearchQueryInTree(Node* node, size_t id, const Matrix<DataType>& query, in
        * are identical. Split in the middle to maintain a balanced tree.
        */
       if ((lim1==count)||(lim2==0)) index = count/2;
+      delete[] mean_;
+      delete[] var_;
     }
     void planeSplit(unsigned* indices, unsigned count, unsigned cutdim, DataType cutval, unsigned& lim1, unsigned& lim2){
       /* Move vector indices for left subtree to front of list. */
-      unsigned left = 0;
-      unsigned right = count-1;
+      int left = 0;
+      int right = count-1;
       for (;; ) {
           while (left<=right && features_.get_row(indices[left])[cutdim]<cutval) ++left;
           while (left<=right && features_.get_row(indices[right])[cutdim]>=cutval) --right;
@@ -892,6 +1104,9 @@ Node* SearchQueryInTree(Node* node, size_t id, const Matrix<DataType>& query, in
 
 
 void DFSbuild(Node* node, std::mt19937& rng, unsigned* indices, unsigned count, unsigned offset){
+//omp_set_lock(&rootlock);
+//std::cout<<node->treeid<<":"<<offset<<":"<<count<<std::endl;
+//omp_unset_lock(&rootlock);
     if(count <= params_.TNS){
         node->DivDim = -1;
         node->Lchild = NULL;
@@ -905,7 +1120,6 @@ void DFSbuild(Node* node, std::mt19937& rng, unsigned* indices, unsigned count, 
         unsigned cutdim;
         DataType cutval;
         meanSplit(rng, indices, count, idx, cutdim, cutval);
-
         node->DivDim = cutdim;
         node->DivVal = cutval;
         node->StartIdx = offset;
@@ -1020,16 +1234,20 @@ omp_init_lock(&rootlock);
 #pragma omp parallel for
 	for(unsigned i = 0; i < ActiveSet.size(); i++){
 	    Node* node = ActiveSet[i];
-	    
+//omp_set_lock(&rootlock);
+//std::cout<<i<<":"<<node->EndIdx-node->StartIdx<<std::endl;
+//omp_unset_lock(&rootlock);
 	    std::mt19937 rng(seed ^ omp_get_thread_num());
 	    std::vector<unsigned>& myids = LeafLists[node->treeid];
 	    DFSbuild(node, rng, &myids[0]+node->StartIdx, node->EndIdx-node->StartIdx, node->StartIdx);
 	}
 //DFStest(0,0,tree_roots_[0]);
 //build tree completed
+
 	for(size_t i = 0; i < (unsigned)TreeNumBuild; i++){
             getMergeLevelNodeList(tree_roots_[i], i ,0);
 	}
+
 #pragma omp parallel for	
 	for(size_t i = 0; i < mlNodeList.size(); i++){
             mergeSubGraphs(mlNodeList[i].second, mlNodeList[i].first);
@@ -1049,11 +1267,26 @@ omp_init_lock(&rootlock);
         for (unsigned n = 0; n < N; ++n) {
             auto &nhood = nhoods[n];
             Points &pool = nhood.pool;
-            if(nhood.nn_new.size()<params_.S*2)GenRandom(rng, &nhood.nn_new[0], nhood.nn_new.size(), N);
-            
+            if(nhood.nn_new.size()<params_.S*2){
+		nhood.nn_new.resize(params_.S*2);
+		GenRandom(rng, &nhood.nn_new[0], nhood.nn_new.size(), N);
+	    }
+
+	    
             GenRandom(rng, &random[0], random.size(), N);
             nhood.L = params_.S;
             nhood.Range = params_.S;
+	    while(knn_graph[n].size() < params_.S){
+		unsigned rand_id = rng() % N;
+		DataType dist = distance_->compare(
+                	features_.get_row(n), features_.get_row(rand_id), features_.get_cols());
+		Candidate<DataType> c(rand_id,dist);
+		knn_graph[n].insert(c);
+	    }
+
+//omp_set_lock(&rootlock);
+//if(knn_graph[n].size() < nhood.L)std::cout<<n<<":"<<knn_graph[n].size()<<std::endl;
+//omp_unset_lock(&rootlock);
             unsigned i = 0;
 	    typename CandidateHeap::reverse_iterator it = knn_graph[n].rbegin();
             for (unsigned l = 0; l < nhood.L; ++l) {
@@ -1063,7 +1296,7 @@ omp_init_lock(&rootlock);
 		nhood.nn_new[l] = it->row_id;
                 nn.dist = it->distance;//distance_->compare(features_.get_row(n), features_.get_row(nn.id), features_.get_cols());
                 nn.flag = true;it++;
-		if(it == knn_graph[n].rend())break;
+		//if(it == knn_graph[n].rend())break;
             }
             sort(pool.begin(), pool.begin() + nhood.L);
         }
