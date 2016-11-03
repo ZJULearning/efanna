@@ -29,18 +29,31 @@ struct construct_func {
 //TODO: default params
 template<typename T>
 FIndex<T>* _construct_kdtreeub(Matrix<T> dataset, Distance<T>* dist, int in_n, const mxArray *in_array[]){
-    if (in_n!=7) {
+    if (in_n!=8 && in_n!=9 && in_n!=2) {
         mexErrMsgTxt("Incorrect number of input arguments");
     }
+
     bool rnn_used = (bool)(*mxGetPr(in_array[0]));
     int trees = (int)(*mxGetPr(in_array[1]));
+    if (in_n==2) {
+        mexPrintf("kdtreeub params : %d\n", trees);
+        return new FIndex<T>(dataset, dist, KDTreeUbIndexParams(rnn_used, trees, 10, 10, 10, 10, 10, trees, 10));
+    }
+
     int mlevel = (int)(*mxGetPr(in_array[2]));
     int epoches = (int)(*mxGetPr(in_array[3]));
-    int K = (int)(*mxGetPr(in_array[4]));
-    int L = (int)(*mxGetPr(in_array[5]));
-    int use_k = (int)(*mxGetPr(in_array[6]));
-    mexPrintf("kdtreeub params : %d %d %d %d %d %d %d\n", rnn_used, trees, mlevel, epoches, K, L, use_k);
-    return new FIndex<T>(dataset, dist, KDTreeUbIndexParams(rnn_used, trees, mlevel, epoches, K, L, use_k));
+    int L = (int)(*mxGetPr(in_array[4]));
+    int check_k = (int)(*mxGetPr(in_array[5]));
+    int K = (int)(*mxGetPr(in_array[6]));
+    int S = (int)(*mxGetPr(in_array[7]));
+    if (in_n==8) {
+        mexPrintf("kdtreeub params : %d %d %d %d %d %d %d\n", trees, mlevel, epoches, L, check_k, K, S);
+        return new FIndex<T>(dataset, dist, KDTreeUbIndexParams(rnn_used, trees, mlevel, epoches, check_k, L, K, trees, S));
+    } else if (in_n==9) {
+        int build_trees = (int)(*mxGetPr(in_array[8]));
+        mexPrintf("kdtreeub params : %d %d %d %d %d %d %d %d\n", trees, mlevel, epoches, L, check_k, K, S, build_trees);
+        return new FIndex<T>(dataset, dist, KDTreeUbIndexParams(rnn_used, trees, mlevel, epoches, check_k, L, K, build_trees, S));
+    }   
 }
 
 template<typename T>
@@ -99,6 +112,8 @@ void _construct(int out_n, mxArray* out_array[], int in_n, const mxArray *in_arr
 
     FIndex<T>* result = (*index_table[index_name])(dataset, dist_table[dist_name], in_n-3, in_array+3);
     out_array[0] = handle2mat<FIndex<T> >(result);
+    //mxFree(index_name);
+    //mxFree(dist_name);
 }
 
 template<typename T>
@@ -129,8 +144,8 @@ void _get_graph_mat(int out_n, mxArray* out_array[], int in_n, const mxArray *in
     
     //the type must be double*
     double* pr = (double *)mxCalloc(maxnnz, sizeof(double));
-    size_t* ir = (size_t *)mxCalloc(maxnnz, sizeof(size_t));
-    size_t* jc = (size_t *)mxCalloc(nrows + 1, sizeof(size_t));
+    mwIndex* ir = (size_t *)mxCalloc(maxnnz, sizeof(mwIndex));
+    mwIndex* jc = (size_t *)mxCalloc(nrows + 1, sizeof(mwIndex));
     int nfilled = -1;
     int njc = 0;
     jc[0] = 0;
@@ -185,6 +200,7 @@ void _load_index(int out_n, mxArray* out_array[], int in_n, const mxArray *in_ar
     char* path = mxArrayToString(in_array[1]);
     FIndex<T>* handle = mat2handle<FIndex<T> >(in_array[0]);
     handle->loadIndex(path);
+    mxFree(path);
 }
 
 template<typename T>
@@ -195,6 +211,7 @@ void _save_index(int out_n, mxArray* out_array[], int in_n, const mxArray *in_ar
     char* path = mxArrayToString(in_array[1]);
     FIndex<T>* handle = mat2handle<FIndex<T> >(in_array[0]);
     handle->saveIndex(path);
+    mxFree(path);
 }
 
 template<typename T>
@@ -206,6 +223,7 @@ void _load_graph(int out_n, mxArray* out_array[], int in_n, const mxArray *in_ar
     FIndex<T>* handle = mat2handle<FIndex<T> >(in_array[0]);
     handle->loadGraph(path);
     _get_graph_mat<T>(out_n, out_array, in_n, in_array);
+    mxFree(path);
 }
 
 template<typename T>
@@ -216,6 +234,7 @@ void _save_graph(int out_n, mxArray* out_array[], int in_n, const mxArray *in_ar
     char* path = mxArrayToString(in_array[1]);
     FIndex<T>* handle = mat2handle<FIndex<T> >(in_array[0]);
     handle->saveGraph(path);
+    mxFree(path);
 }
 
 template<typename T>
@@ -226,6 +245,7 @@ void _load_trees(int out_n, mxArray* out_array[], int in_n, const mxArray *in_ar
     char* path = mxArrayToString(in_array[1]);
     FIndex<T>* handle = mat2handle<FIndex<T> >(in_array[0]);
     handle->loadTrees(path);
+    mxFree(path);
 }
 
 template<typename T>
@@ -236,14 +256,15 @@ void _save_trees(int out_n, mxArray* out_array[], int in_n, const mxArray *in_ar
     char* path = mxArrayToString(in_array[1]);
     FIndex<T>* handle = mat2handle<FIndex<T> >(in_array[0]);
     handle->saveTrees(path);
+    mxFree(path);
 }
 
 template<typename T>
 void _set_search_params_kdtreeub(FIndex<T>* handle, int in_n, const mxArray *in_array[]) {
-    int search_extend = (int)(*mxGetPr(in_array[0]));
-    int search_epoc = (int)(*mxGetPr(in_array[1]));
-    int search_lv = (int)(*mxGetPr(in_array[2]));
-    int search_trees = (int)(*mxGetPr(in_array[3]));
+    int search_trees = (int)(*mxGetPr(in_array[0]));
+    int search_lv = (int)(*mxGetPr(in_array[1]));
+    int search_epoc = (int)(*mxGetPr(in_array[2]));
+    int search_extend = (int)(*mxGetPr(in_array[3]));
     int poolsz = (int)(*mxGetPr(in_array[4]));
     handle->setSearchParams(search_epoc, poolsz, search_extend, search_trees,search_lv);
 }
@@ -278,6 +299,7 @@ void _set_search_params(int out_n, mxArray* out_array[], int in_n, const mxArray
     }
     FIndex<T>* handle = mat2handle<FIndex<T> >(in_array[0]);
     (*index_table[index_name])(handle, in_n-2, in_array+2);
+    //mxFree(index_name);
 }
 
 template<typename T>
@@ -297,6 +319,7 @@ void _save_result(int out_n, mxArray* out_array[], int in_n, const mxArray *in_a
     char* path = mxArrayToString(in_array[1]);
     FIndex<T>* handle = mat2handle<FIndex<T> >(in_array[0]);
     handle->saveResults(path);
+    mxFree(path);
 }
 
 template<typename T>
@@ -332,4 +355,5 @@ void mexFunction(int out_n, mxArray* out_array[], int in_n, const mxArray *in_ar
     }
     mexPrintf("Running Function : %s ...\n", func_name.c_str());
     (*ftable[func_name])(out_n, out_array, in_n-1, in_array+1);
+    //mxFree(func_name);
 }
