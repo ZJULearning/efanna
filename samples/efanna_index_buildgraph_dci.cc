@@ -26,9 +26,8 @@ if(dim!=cols)cout<<"data align to dimension "<<cols<<" for sse2 inst"<<endl;
   }
   in.close();
 }
-
 int main(int argc, char** argv){
-  if(argc!=4){cout<< argv[0] << " data_file save_tree_file treesNum " <<endl; exit(-1);}
+  if(argc!=10){cout<< argv[0] << " data_file save_graph_file trees level epoch L K kNN S" <<endl; exit(-1);}
 
   float* data_load = NULL;
   //float* query_load = NULL;
@@ -42,16 +41,21 @@ int main(int argc, char** argv){
   //Matrix<float> query(q_num,qdim,query_load);
 
   unsigned int trees = atoi(argv[3]);
+  int nodec = atoi(argv[4]);
+  unsigned int epochs = atoi(argv[5]);
+  int L = atoi(argv[6]);
+  int checkK = atoi(argv[7]);
+  int kNN = atoi(argv[8]);
+  int S = atoi(argv[9]);
+  
   //srand(time(NULL));
-  //FIndex<float> index(dataset, new L2DistanceSSE<float>(), efanna::KDTreeUbIndexParams(true, trees ,mlevel ,epochs,checkK,L, 10));
-  FIndex<float> index(dataset, new L2DistanceSSE<float>(), efanna::KDTreeUbIndexParams(true, trees , 10 ,10, 10, 10, 10));
-
+  FIndex<float> index(dataset, new L2DistanceAVX<float>(), efanna::DciIndexParams(trees ,trees, nodec, epochs,checkK,L, S, kNN));
   clock_t s,f;
   s = clock();
-  index.buildTrees();
-  f = clock();
+  index.buildIndex();
 
-  cout<<"Trees building time : "<<(f-s)*1.0/CLOCKS_PER_SEC<<" seconds"<<endl;
-  index.saveTrees(argv[2]);
+  f = clock();
+  cout<<"Index building time : "<<(f-s)*1.0/CLOCKS_PER_SEC<<" seconds"<<endl;
+  index.saveGraph(argv[2]);
   return 0;
 }

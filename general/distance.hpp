@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <set>
-#include <xmmintrin.h>
+#include <x86intrin.h>
 #include <cmath>
 #include <iostream> //for debug
 
@@ -46,7 +46,9 @@ struct Candidate {
 template<typename T>
 class Distance {
 public:
-    virtual float compare(const T* a, const T* b, size_t length) const = 0;
+    virtual T compare(const T* a, const T* b, size_t length) const = 0;
+    virtual T norm(const T* a, size_t length) const;
+    virtual T dot(const T* a, const T* b, size_t length) const;
     virtual ~Distance() {}
 };
 
@@ -63,11 +65,11 @@ class L2DistanceSSE: public Distance<T> {
 public:
     typedef T ResultType;
     /**
-     * Copied from flann
+     * 
      * We use msse intrinstic here, we should ensure data align.
      */
 ResultType compare(const T* a, const T* b, size_t size) const {
-//float float_l2sqr_sse2 (float const *t1, float const *t2, unsigned dim) {
+
     __m128 sum;
     __m128 l0, l1, l2, l3;
     __m128 r0, r1, r2, r3;
@@ -100,54 +102,14 @@ ResultType compare(const T* a, const T* b, size_t size) const {
     return ret;//sqrt(ret);
 }
 
+T norm(const T* a, size_t length) const
+{
+}
+T dot(const T* a, const T* b, size_t length) const
+{
+}
 
-    /*
-    ResultType compare(const T* a, const T* b, size_t size) const {
-        ResultType result = ResultType();
-        size_t blocklength = size / 16 * 16; //cycle unroll 4
-        __m128 sum;sum = _mm_setzero_ps();
-        if(size>16)sseL2Dist(a,b,sum,blocklength);//std::cout<<blocklength<<"bl"<<std::endl;
-        if(blocklength != size){
-	    size_t remainder = blocklength;
-	    for(;remainder < size; remainder += 4){
-              __m128 tmpa = _mm_load_ps(a+remainder);
-              __m128 tmpb = _mm_load_ps(b+remainder);
-	      __m128 tmp = _mm_sub_ps(tmpa, tmpb);
-	      tmp = _mm_mul_ps(tmp, tmp);
-	      sum = _mm_add_ps(sum, tmp);
-             
-	    }//no more remaider cause aligned with 4 * 32 bits
-        }
-        ResultType* res = (ResultType*)&sum;
-        for(int i = 0; i < 4; i++){
-          result += res[i];
-        }
-        
-        return result;//sqrt(result);
-    }
-
-*/
-    void sseL2Dist(const T* a, const T* b, __m128& vsum, size_t length) const {
-      ResultType result = ResultType();
-      __m128* va = (__m128*)a;
-      __m128* vb = (__m128*)b;
-      //std::cout<<length<<std::endl;
-      for(size_t i = 0; i < length/16*4; i += 4){
-        __m128 tmp = _mm_sub_ps(va[i], vb[i]);
-        tmp = _mm_mul_ps(tmp, tmp);
-        vsum = _mm_add_ps(vsum, tmp);
-        tmp = _mm_sub_ps(va[i+1], vb[i+1]);
-        tmp = _mm_mul_ps(tmp, tmp);
-        vsum = _mm_add_ps(vsum, tmp);
-        tmp = _mm_sub_ps(va[i+2], vb[i+2]);
-        tmp = _mm_mul_ps(tmp, tmp);
-        vsum = _mm_add_ps(vsum, tmp);
-        tmp = _mm_sub_ps(va[i+3], vb[i+3]);
-        tmp = _mm_mul_ps(tmp, tmp);
-        vsum = _mm_add_ps(vsum, tmp);
-      }
-     
-    }
+  
 };
 
 template<typename T>
@@ -181,7 +143,110 @@ public:
         }
         return result;//sqrt(result);
     }
+T norm(const T* a, size_t length) const
+{
+    return 0;
+}
+T dot(const T* a, const T* b, size_t length) const
+{
+    return 0;
+}
 };
 
+template<typename T>
+class L2DistanceAVX: public Distance<T> {
+public:
+    typedef T ResultType;
+    /**
+     * 
+     * We use msse intrinstic here, we should ensure data align.
+     */
+#define AVX_L2SQR(addr1, addr2, dest, tmp1, tmp2) \
+    tmp1 = _mm256_loadu_ps(addr1);\
+    tmp2 = _mm256_loadu_ps(addr2);\
+    tmp1 = _mm256_sub_ps(tmp1, tmp2); \
+    tmp1 = _mm256_mul_ps(tmp1, tmp1); \
+    dest = _mm256_add_ps(dest, tmp1);
+ResultType compare(const T* a, const T* b, size_t size) const{
+
+    __m256 sum;
+    __m256 l0, l1;
+    __m256 r0, r1;
+    unsigned D = (size + 7) & ~7U;
+    unsigned DR = D % 16;
+    unsigned DD = D - DR;
+    const float *l = a;
+    const float *r = b;
+    const float *e_l = l + DD;
+    const float *e_r = r + DD;
+    float unpack[8] __attribute__ ((aligned (32))) = {0, 0, 0, 0, 0, 0, 0, 0};
+    ResultType ret = 0.0;
+    sum = _mm256_loadu_ps(unpack);
+    if(DR){AVX_L2SQR(e_l, e_r, sum, l0, r0);}
+    
+    for (unsigned i = 0; i < DD; i += 16, l += 16, r += 16) {
+	AVX_L2SQR(l, r, sum, l0, r0);
+	AVX_L2SQR(l + 8, r + 8, sum, l1, r1);
+    }
+    _mm256_storeu_ps(unpack, sum);
+    ret = unpack[0] + unpack[1] + unpack[2] + unpack[3] + unpack[4] + unpack[5] + unpack[6] + unpack[7];
+    return ret;//sqrt(ret);
+}
+#define AVX_L2NORM(addr, dest, tmp) \
+    tmp = _mm256_loadu_ps(addr); \
+    tmp = _mm256_mul_ps(tmp, tmp); \
+    dest = _mm256_add_ps(dest, tmp);
+    T norm(const T* a, size_t size) const
+    {
+	__m256 sum;
+   	__m256 l0, l1;
+    	unsigned D = (size + 7) & ~7U;
+    	unsigned DR = D % 16;
+    	unsigned DD = D - DR;
+    	const float *l = a;
+    	const float *e_l = l + DD;
+    	float unpack[8] __attribute__ ((aligned (32))) = {0, 0, 0, 0, 0, 0, 0, 0};
+    	ResultType ret = 0.0;
+    	sum = _mm256_loadu_ps(unpack);
+    	if(DR){AVX_L2NORM(e_l, sum, l0);}
+	for (unsigned i = 0; i < DD; i += 16, l += 16) {
+	    AVX_L2NORM(l, sum, l0);
+	    AVX_L2NORM(l + 8, sum, l1);
+        }
+    	_mm256_storeu_ps(unpack, sum);
+    	ret = unpack[0] + unpack[1] + unpack[2] + unpack[3] + unpack[4] + unpack[5] + unpack[6] + unpack[7];
+    	return ret;
+    }
+#define AVX_L2DOT(addr1, addr2, dest, tmp1, tmp2) \
+    tmp1 = _mm256_loadu_ps(addr1);\
+    tmp2 = _mm256_loadu_ps(addr2);\
+    tmp1 = _mm256_mul_ps(tmp1, tmp2); \
+    dest = _mm256_add_ps(dest, tmp1);
+    T dot(const T* a, const T* b, size_t size) const
+    {
+	__m256 sum;
+   	 __m256 l0, l1;
+   	 __m256 r0, r1;
+    	unsigned D = (size + 7) & ~7U;
+    	unsigned DR = D % 16;
+    	unsigned DD = D - DR;
+   	const float *l = a;
+   	const float *r = b;
+    	const float *e_l = l + DD;
+   	const float *e_r = r + DD;
+    	float unpack[8] __attribute__ ((aligned (32))) = {0, 0, 0, 0, 0, 0, 0, 0};
+    	ResultType ret = 0.0;
+    	sum = _mm256_loadu_ps(unpack);
+    	if(DR){AVX_L2DOT(e_l, e_r, sum, l0, r0);}
+    
+    	for (unsigned i = 0; i < DD; i += 16, l += 16, r += 16) {
+	    AVX_L2DOT(l, r, sum, l0, r0);
+	    AVX_L2DOT(l + 8, r + 8, sum, l1, r1);
+    	}
+    	_mm256_storeu_ps(unpack, sum);
+    	ret = unpack[0] + unpack[1] + unpack[2] + unpack[3] + unpack[4] + unpack[5] + unpack[6] + unpack[7];
+    	return ret;
+    }
+};
 }
 #endif

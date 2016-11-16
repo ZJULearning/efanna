@@ -49,7 +49,7 @@ int main(int argc, char** argv){
   int S = atoi(argv[9]);
   
   //srand(time(NULL));
-  FIndex<float> index(dataset, new L2DistanceSSE<float>(), efanna::KDTreeUbIndexParams(true, trees ,mlevel ,epochs,checkK,L, kNN, trees, S));
+  FIndex<float> index(dataset, new L2DistanceAVX<float>(), efanna::KDTreeUbIndexParams(true, trees ,mlevel ,epochs,checkK,L, kNN, trees, S));
   clock_t s,f;
   s = clock();
   index.buildIndex();

@@ -5,6 +5,7 @@
 #include "kdtreeub_index.hpp"
 #include "ieh_index.hpp"
 #include "nnexp_index.hpp"
+#include "dci_index.hpp"
 namespace efanna{
 
 
@@ -32,6 +33,9 @@ namespace efanna{
         break;
         case NNEXP:
         initIndex = create_index_<NNexpIndex, DataType>(dataset, params, d);
+        break;
+        case DCI:
+        initIndex = create_index_<DciIndex, DataType>(dataset, params, d);
         break;
 
       }

@@ -8,7 +8,8 @@ namespace efanna {
       RANDOM,
       KDTREE_UB,
       IEH,
-      NNEXP
+      NNEXP,
+      DCI
   };
 
   union ValueType{
@@ -37,9 +38,9 @@ namespace efanna {
   struct SearchParams{
     int search_init_num;
     int search_epoches;
-    int extend_to;
-    unsigned int tree_num;
-    int search_depth;
+    unsigned extend_to;
+    unsigned tree_num;
+    unsigned search_depth;
   };
 
 }

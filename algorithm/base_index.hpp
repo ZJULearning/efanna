@@ -267,7 +267,7 @@ SearchParams SP;
                       //the heap is max heap
                       ids.clear();
                       typename CandidateHeap::reverse_iterator it = Candidates.rbegin();
-                      for(int j = 0; j < SP.extend_to && it != Candidates.rend(); j++,it++){
+                      for(unsigned j = 0; j < SP.extend_to && it != Candidates.rend(); j++,it++){
                     	//  if(it->row_id>=base_n) std::cout<<"query:"<< cur<<" Judge node  "<<it->row_id<<std::endl;
                         if(newflag.test(it->row_id)){
                           newflag.reset(it->row_id);
@@ -437,15 +437,16 @@ SearchParams SP;
         f = clock();
         std::cout << "iteration "<< iter << " time: "<< (f-s)*1.0/CLOCKS_PER_SEC<<" seconds"<< std::endl;
       }
-
+	calculate_norm();
       //std::cout << nhoods.size() << std::endl;
       knn_graph.clear();
-
+	
       for(size_t i = 0; i < nhoods.size(); i++){
         CandidateHeap can;
         for(size_t j = 0; j < params_.K; j++){
           Candidate<DataType> c(nhoods[i].pool[j].id,nhoods[i].pool[j].dist);
           can.insert(c);
+	  
         }
         while(can.size()<params_.K){
           unsigned id = rand() % nhoods.size();
@@ -455,6 +456,24 @@ SearchParams SP;
         }
         knn_graph.push_back(can);
       }
+	g.resize(nhoods.size());
+	M.resize(nhoods.size());
+	for(unsigned i = 0; i < nhoods.size();i++){
+	    M[i] = nhoods[i].Range;
+	    g[i].resize(nhoods[i].pool.size());
+	    std::copy(nhoods[i].pool.begin(), nhoods[i].pool.end(), g[i].begin());
+	}
+		
+    }
+    
+    void calculate_norm(){
+	unsigned N = features_.get_rows();
+	unsigned D = features_.get_cols();
+	norms.resize(N);
+#pragma omp parallel for
+        for (unsigned n = 0; n < N; ++n) {
+	    norms[n] = distance_->norm(features_.get_row(n),D);
+	}
     }
 typedef std::set<Candidate<DataType>, std::greater<Candidate<DataType>> > CandidateHeap;
 typedef std::vector<unsigned int> IndexVec;
@@ -471,15 +490,13 @@ protected:
     const Matrix<DataType> features_;
     const Distance<DataType>* distance_;
     const IndexParams params_;
-    std::vector<std::vector<int>> knn_table_gt;
+    std::vector<std::vector<int> > knn_table_gt;
+    std::vector<std::vector<Point> > g;
+    std::vector<unsigned> M;
     //std::vector<std::vector<int>> knn_graph;
     std::vector<CandidateHeap> knn_graph;
-    std::vector<Lock> Locks;
-    std::vector<IndexVec> nn_new;
-    std::vector<IndexVec> nn_old;
-    std::vector<IndexVec> rnn_new;
-    std::vector<IndexVec> rnn_old;
-    std::vector<std::vector<int>> nn_results;
+    std::vector<DataType> norms;
+    std::vector<std::vector<int> > nn_results;
     DataType* Radius;
   };
 #define USING_BASECLASS_SYMBOLS \
@@ -496,6 +513,9 @@ protected:
     using InitIndex<DataType>::SP;\
     using InitIndex<DataType>::nnExpansion;\
     using InitIndex<DataType>::nnExpansion_kgraph;\
-    using InitIndex<DataType>::Locks;
+    using InitIndex<DataType>::g;\
+    using InitIndex<DataType>::M;\
+    using InitIndex<DataType>::norms;
+
 }
 #endif

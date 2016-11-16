@@ -3,7 +3,9 @@
 #include <fstream>
 #include <ctime>
 #include <malloc.h>
+#include <boost/timer/timer.hpp>
 
+using namespace boost;
 using namespace efanna;
 using namespace std;
 void load_data(char* filename, float*& data, size_t& num,int& dim){// load data with sift10K pattern
@@ -15,7 +17,7 @@ void load_data(char* filename, float*& data, size_t& num,int& dim){// load data 
   ios::pos_type ss = in.tellg();
   size_t fsize = (size_t)ss;
   num = fsize / (dim+1) / 4;
-  int cols = (dim + 3)/4*4;
+  int cols = (dim + 7)/8*8;
   data = (float*)memalign(KGRAPH_MATRIX_ALIGN, num * cols * sizeof(float));
 if(dim!=cols)cout<<"data align to dimension "<<cols<<" for sse2 inst"<<endl;
 
@@ -40,7 +42,7 @@ int main(int argc, char** argv){
   Matrix<float> dataset(points_num,dim,data_load);
   Matrix<float> query(q_num,qdim,query_load);
 
-  FIndex<float> index(dataset, new L2DistanceSSE<float>(), efanna::KDTreeUbIndexParams(true, 8 ,8 ,10,25,30,10));
+  FIndex<float> index(dataset, new L2DistanceAVX<float>(), efanna::KDTreeUbIndexParams(true, 8 ,8 ,10,25,30,10));
   index.loadTrees(argv[2]);
   index.loadGraph(argv[3]);
 
@@ -51,11 +53,15 @@ int main(int argc, char** argv){
   int search_extend = atoi(argv[10]);
   index.setSearchParams(search_epoc, poolsz, search_extend, search_trees,search_lv);
 
-  clock_t s,f;
-  s = clock();
+  
+//clock_t s,f;
+boost::timer::auto_cpu_timer timer;
+//s=clock();
   index.knnSearch(atoi(argv[11])/*query nn*/,query);
-  f = clock();
-  cout<<"Query searching time : "<<(f-s) * 1.0 / CLOCKS_PER_SEC<<" seconds"<<endl;
+//f=clock();
+  
+//cout<<(f-s)*1.0/CLOCKS_PER_SEC/8<<endl;
+cout<<timer.elapsed().wall / 1e9<<endl;
   index.saveResults(argv[5]);
   return 0;
 }

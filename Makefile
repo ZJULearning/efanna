@@ -1,7 +1,8 @@
 GXX=g++ -std=c++11
-OPTM=-O3 -msse2 -msse4 -fopenmp
+#OPTM=-Ofast -msse2 -msse4 -fopenmp
+OPTM=-Ofast -march=native -fopenmp
 CPFLAGS=$(OPTM) -Wall
-LDFLAGS=$(OPTM) -Wall
+LDFLAGS=$(OPTM) -Wall -lboost_timer -lboost_system
 
 INCLUDES=-I./ -I./algorithm -I./general
 
