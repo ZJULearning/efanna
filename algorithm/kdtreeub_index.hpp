@@ -740,8 +740,7 @@ void getNeighbors(size_t searchK, const Matrix<DataType>& query){
 	      
 	    }
 	    if(cans.size() > pool_size){
-		if(SP.search_depth == 1)std::partial_sort(cans.begin(),cans.begin()+SP.extend_to,cans.end());
-		break;
+		std::partial_sort(cans.begin(),cans.begin()+pool_size,cans.end());
 	    }
 	}
 	if(cans.size() < pool_size){
