@@ -11,31 +11,31 @@
 #include <boost/dynamic_bitset.hpp>
 
 namespace efanna{
-  struct KDTreeUbIndexParams : public IndexParams
-  {
-      KDTreeUbIndexParams(bool rnn_used, int tree_num_total, int merge_level, int epoches = 4, int check = 25, int myL = 30, int building_use_k = 10, int tree_num_build = 0, int myS = 10)
-      {
-          reverse_nn_used = rnn_used;
-          init_index_type = KDTREE_UB;
-          K = building_use_k;
-          build_epoches = epoches;
-          S = myS;
-          ValueType treev;
-          treev.int_val = tree_num_total;
-          extra_params.insert(std::make_pair("trees",treev));
-          ValueType treeb;
-          treeb.int_val = tree_num_build > 0 ? tree_num_build : tree_num_total;
-          extra_params.insert(std::make_pair("treesb",treeb));
-          ValueType merge_levelv;
-          merge_levelv.int_val = merge_level;
-          extra_params.insert(std::make_pair("ml",merge_levelv));
-          L = myL;
-          Check_K = check;
-      }
-  };
-  template <typename DataType>
-  class KDTreeUbIndex : public InitIndex<DataType>
-  {
+struct KDTreeUbIndexParams : public IndexParams
+{
+    KDTreeUbIndexParams(bool rnn_used, int tree_num_total, int merge_level, int epoches = 4, int check = 25, int myL = 30, int building_use_k = 10, int tree_num_build = 0, int myS = 10)
+    {
+      reverse_nn_used = rnn_used;
+      init_index_type = KDTREE_UB;
+      K = building_use_k;
+      build_epoches = epoches;
+      S = myS;
+      ValueType treev;
+      treev.int_val = tree_num_total;
+      extra_params.insert(std::make_pair("trees",treev));
+      ValueType treeb;
+      treeb.int_val = tree_num_build > 0 ? tree_num_build : tree_num_total;
+      extra_params.insert(std::make_pair("treesb",treeb));
+      ValueType merge_levelv;
+      merge_levelv.int_val = merge_level;
+      extra_params.insert(std::make_pair("ml",merge_levelv));
+      L = myL;
+      Check_K = check;
+    }
+};
+template <typename DataType>
+class KDTreeUbIndex : public InitIndex<DataType>
+{
   public:
 
     typedef InitIndex<DataType> BaseClass;
@@ -95,7 +95,7 @@ namespace efanna{
         int DivDim;
         DataType DivVal;
         size_t StartIdx, EndIdx;
-	unsigned treeid;
+        unsigned treeid;
         Node* Lchild, * Rchild;
 
         ~Node() {
@@ -106,120 +106,120 @@ namespace efanna{
     };
 
     void loadIndex(char* filename){
-	     read_data(filename);
+      read_data(filename);
     }
     void saveIndex(char* filename){
 
-         size_t points_num = features_.get_rows();
-         size_t feature_dim = features_.get_cols();
-         save_data(filename, params_.K, points_num, feature_dim);
+      size_t points_num = features_.get_rows();
+      size_t feature_dim = features_.get_cols();
+      save_data(filename, params_.K, points_num, feature_dim);
     }
     //algorithms copy and rewrite from flann
     void loadTrees(char* filename){
       std::ifstream in(filename, std::ios::binary|std::ios::in);
-    	if(!in.is_open()){std::cout<<"open file error"<<std::endl;exit(-10087);}
-    	unsigned int K,tree_num;
-    	size_t dim,num;
+      if(!in.is_open()){std::cout<<"open file error"<<std::endl;exit(-10087);}
+      unsigned int K,tree_num;
+      size_t dim,num;
 
-    	//read file head
-    	in.read((char*)&(K),sizeof(unsigned int));
-    	in.read((char*)&(tree_num),sizeof(unsigned int));
-    	in.read((char*)&(num),sizeof(size_t));
-    	in.read((char*)&(dim),sizeof(size_t));
+      //read file head
+      in.read((char*)&(K),sizeof(unsigned int));
+      in.read((char*)&(tree_num),sizeof(unsigned int));
+      in.read((char*)&(num),sizeof(size_t));
+      in.read((char*)&(dim),sizeof(size_t));
 
-    	SP.tree_num = tree_num;
+      SP.tree_num = tree_num;
 
-	     //read trees
+      //read trees
 
       tree_roots_.clear();
-    	for(unsigned int i=0;i<tree_num;i++){// for each tree
-    		int node_num, node_size;
-    		in.read((char*)&(node_num),sizeof(int));
-    		in.read((char*)&(node_size),sizeof(int));
+      for(unsigned int i=0;i<tree_num;i++){// for each tree
+        int node_num, node_size;
+        in.read((char*)&(node_num),sizeof(int));
+        in.read((char*)&(node_size),sizeof(int));
 
-    		std::vector<struct Node *> tree_nodes;
-    		for(int j=0;j<node_num;j++){
-    			struct Node *tmp = new struct Node();
-    			in.read((char*)&(tmp->DivDim),sizeof(tmp->DivDim));
-    			in.read((char*)&(tmp->DivVal),sizeof(tmp->DivVal));
-    			in.read((char*)&(tmp->StartIdx),sizeof(tmp->StartIdx));
-    			in.read((char*)&(tmp->EndIdx),sizeof(tmp->EndIdx));
-    			in.read((char*)&(tmp->Lchild),sizeof(tmp->Lchild));
-    			in.read((char*)&(tmp->Rchild),sizeof(tmp->Rchild));
-    			tmp->Lchild = NULL;
-    			tmp->Rchild = NULL;
-			tmp->treeid = i;
-    			tree_nodes.push_back(tmp);
+        std::vector<struct Node *> tree_nodes;
+        for(int j=0;j<node_num;j++){
+          struct Node *tmp = new struct Node();
+          in.read((char*)&(tmp->DivDim),sizeof(tmp->DivDim));
+          in.read((char*)&(tmp->DivVal),sizeof(tmp->DivVal));
+          in.read((char*)&(tmp->StartIdx),sizeof(tmp->StartIdx));
+          in.read((char*)&(tmp->EndIdx),sizeof(tmp->EndIdx));
+          in.read((char*)&(tmp->Lchild),sizeof(tmp->Lchild));
+          in.read((char*)&(tmp->Rchild),sizeof(tmp->Rchild));
+          tmp->Lchild = NULL;
+          tmp->Rchild = NULL;
+          tmp->treeid = i;
+          tree_nodes.push_back(tmp);
 
 
-    		}
+        }
         //std::cout<<"build "<<i<<std::endl;
-    		struct Node *root = DepthFirstBuildTree(tree_nodes);
-    		if(root==NULL){ exit(-11); }
-    		tree_roots_.push_back(root);
-    	}
+        struct Node *root = DepthFirstBuildTree(tree_nodes);
+        if(root==NULL){ exit(-11); }
+        tree_roots_.push_back(root);
+      }
 
-	     //read index range
+      //read index range
       LeafLists.clear();
       for(unsigned int i=0;i<tree_num;i++){
 
-      	std::vector<unsigned> leaves;
-      	for(unsigned int j=0;j<num; j++){
-      		unsigned leaf;
-      		in.read((char*)&(leaf),sizeof(int));
-      		leaves.push_back(leaf);
-      	}
-      	LeafLists.push_back(leaves);
+        std::vector<unsigned> leaves;
+        for(unsigned int j=0;j<num; j++){
+          unsigned leaf;
+          in.read((char*)&(leaf),sizeof(int));
+          leaves.push_back(leaf);
+        }
+        LeafLists.push_back(leaves);
       }
       in.close();
     }
     void saveTrees(char* filename){
-        unsigned int K = params_.K;
-        size_t num = features_.get_rows();
-        size_t dim = features_.get_cols();
-        std::fstream out(filename, std::ios::binary|std::ios::out);
-      	if(!out.is_open()){std::cout<<"open file error"<<std::endl;exit(-10086);}
-      	unsigned int tree_num = tree_roots_.size();
+      unsigned int K = params_.K;
+      size_t num = features_.get_rows();
+      size_t dim = features_.get_cols();
+      std::fstream out(filename, std::ios::binary|std::ios::out);
+      if(!out.is_open()){std::cout<<"open file error"<<std::endl;exit(-10086);}
+      unsigned int tree_num = tree_roots_.size();
 
-      	//write file head
-      	out.write((char *)&(K), sizeof(unsigned int));
-      	out.write((char *)&(tree_num), sizeof(unsigned int));
-      	out.write((char *)&(num), sizeof(size_t)); //feature point number
-      	out.write((char *)&(dim), sizeof(size_t)); //feature dim
+      //write file head
+      out.write((char *)&(K), sizeof(unsigned int));
+      out.write((char *)&(tree_num), sizeof(unsigned int));
+      out.write((char *)&(num), sizeof(size_t)); //feature point number
+      out.write((char *)&(dim), sizeof(size_t)); //feature dim
 
-      	//write trees
-      	typename std::vector<Node *>::iterator it;//int cnt=0;
-        for(it=tree_roots_.begin(); it!=tree_roots_.end(); it++){
-          //write tree nodes with depth first trace
+      //write trees
+      typename std::vector<Node *>::iterator it;//int cnt=0;
+      for(it=tree_roots_.begin(); it!=tree_roots_.end(); it++){
+        //write tree nodes with depth first trace
 
 
-          size_t offset_node_num = out.tellp();
+        size_t offset_node_num = out.tellp();
 
-          out.seekp(sizeof(int),std::ios::cur);
+        out.seekp(sizeof(int),std::ios::cur);
 
-          unsigned int node_size = sizeof(struct Node);
-          out.write((char *)&(node_size), sizeof(int));
+        unsigned int node_size = sizeof(struct Node);
+        out.write((char *)&(node_size), sizeof(int));
 
-          unsigned int node_num = DepthFirstWrite(out, *it);
+        unsigned int node_num = DepthFirstWrite(out, *it);
 
-          out.seekg(offset_node_num,std::ios::beg);
+        out.seekg(offset_node_num,std::ios::beg);
 
-          out.write((char *)&(node_num), sizeof(int));
+        out.write((char *)&(node_num), sizeof(int));
 
-          out.seekp(0,std::ios::end);
-          //std::cout<<"tree: "<<cnt++<<" written, node: "<<node_num<<" at offset " << offset_node_num <<std::endl;
+        out.seekp(0,std::ios::end);
+        //std::cout<<"tree: "<<cnt++<<" written, node: "<<node_num<<" at offset " << offset_node_num <<std::endl;
+      }
+
+      if(LeafLists.size()!=tree_num){ std::cout << "leaf_size!=tree_num" << std::endl; exit(-6); }
+
+      for(unsigned int i=0; i<tree_num; i++){
+        for(unsigned int j=0;j<num;j++){
+          out.write((char *)&(LeafLists[i][j]), sizeof(int));
         }
-
-      	if(LeafLists.size()!=tree_num){ std::cout << "leaf_size!=tree_num" << std::endl; exit(-6); }
-
-      	for(unsigned int i=0; i<tree_num; i++){
-      		for(unsigned int j=0;j<num;j++){
-      			out.write((char *)&(LeafLists[i][j]), sizeof(int));
-      		}
-      	}
-        out.close();
+      }
+      out.close();
     }
-/*
+    /*
     void loadGraph(char* filename){
       std::ifstream in(filename,std::ios::binary);
       in.seekg(0,std::ios::end);
@@ -245,35 +245,43 @@ namespace efanna{
       }
       in.close();
     }
-   */ 
+     */
     void loadGraph(char* filename){
-	std::ifstream in(filename,std::ios::binary);
-        unsigned N;
-	
-	in.read((char*)&N, sizeof(unsigned));
+      std::ifstream in(filename,std::ios::binary);
+      unsigned N;
 
-        g.resize(N);
-	M.resize(N);
-	norms.resize(N);
-	for(unsigned i=0; i < N; i++){
-	    unsigned k,m;
-	    DataType norm;
-	    in.read((char*)&k, sizeof(unsigned));
-	    in.read((char*)&m, sizeof(unsigned));
-	    in.read((char*)&norm, sizeof(DataType));
-	    norms[i] = norm;
-	    M[i] = m;
-	    g[i].resize(k);
+      in.seekg(0,std::ios::end);
+      std::ios::pos_type ss = in.tellg();
+      size_t fsize = (size_t)ss;
+      int dim;
+      in.seekg(0,std::ios::beg);
+      in.read((char*)&dim, sizeof(int));
+      N = fsize / (dim+1) / 4;
 
-	    for(unsigned j=0; j<k; j++){
-		unsigned id;
-		in.read((char*)&id, sizeof(unsigned));
-		g[i][j].id = id;
-	    }
-	}
-	in.close();
+      in.seekg(0,std::ios::beg);
+
+      gs.resize(N);
+      //M.resize(N);
+      //norms.resize(N);
+      for(unsigned i=0; i < N; i++){
+        unsigned k;
+        //DataType norm;
+        in.read((char*)&k, sizeof(unsigned));
+        //in.read((char*)&m, sizeof(unsigned));
+        //in.read((char*)&norm, sizeof(DataType));
+        //norms[i] = norm;
+        //M[i] = m;
+        gs[i].resize(k);
+
+        for(unsigned j=0; j<k; j++){
+          unsigned id;
+          in.read((char*)&id, sizeof(unsigned));
+          gs[i][j] = id;
+        }
+      }
+      in.close();
     }
-/*
+    /*
     void saveGraph(char* filename){
      std::ofstream out(filename,std::ios::binary);
 
@@ -289,410 +297,60 @@ namespace efanna{
      //std::cout << "size mean " << meansize << std::endl;
      out.close();
     }
-*/
+     */
     void saveGraph(char* filename){
-	std::ofstream out(filename,std::ios::binary);
-	unsigned N = g.size();
-	out.write((char*)&N, sizeof(int));
-	for(unsigned i=0; i < N; i++){
-	    unsigned k = g[i].size();
-	    unsigned m = M[i];
-	    DataType norm = norms[i];
-	    out.write((char*)&k, sizeof(unsigned));
-	    out.write((char*)&m, sizeof(unsigned));
-	    out.write((char*)&norm, sizeof(DataType));	
-	    for(unsigned j = 0; j < k; j++){
-		unsigned id = g[i][j].id;
-		out.write((char*)&id, sizeof(unsigned));
-	    }
-	}
-	out.close();
+      std::ofstream out(filename,std::ios::binary);
+      unsigned N = gs.size();
+      //out.write((char*)&N, sizeof(int));
+      for(unsigned i=0; i < N; i++){
+        unsigned k = gs[i].size();
+        //unsigned m = M[i];
+        //DataType norm = norms[i];
+        out.write((char*)&k, sizeof(unsigned));
+        //out.write((char*)&m, sizeof(unsigned));
+        //out.write((char*)&norm, sizeof(DataType));
+        for(unsigned j = 0; j < k; j++){
+          unsigned id = gs[i][j];
+          out.write((char*)&id, sizeof(unsigned));
+        }
+      }
+      out.close();
     }
-//for nn search
-Node* SearchQueryInTree(Node* node, size_t id, const Matrix<DataType>& query, int depth){
+    //for nn search
+
+    void SearchQueryToLeaf(Node* node, const DataType* q, unsigned dep, std::vector<Node*>& node_pool){
       if(node->Lchild != NULL && node->Rchild !=NULL){
-        if(depth == SP.search_depth)return node;
-        depth++;
-        if(query.get_row(id)[node->DivDim] < node->DivVal)
-          return SearchQueryInTree(node->Lchild, id, query, depth);
-        else
-          return SearchQueryInTree(node->Rchild, id, query, depth);
+        if(q[node->DivDim] < node->DivVal){
+          SearchQueryToLeaf(node->Lchild, q, dep, node_pool);
+          if(node_pool.size() < dep)
+            SearchQueryToLeaf(node->Rchild, q, dep, node_pool);
+        }
+        else{
+          SearchQueryToLeaf(node->Rchild, q, dep, node_pool);
+          if(node_pool.size() < dep)
+            SearchQueryToLeaf(node->Lchild, q, dep, node_pool);
+        }
       }
       else
-        return node;
-
+        node_pool.push_back(node);
     }
-void getSearchNodeList(Node* node, size_t id, const Matrix<DataType>& query, int depth, std::vector<Node*>& vn){
-    if(node->Lchild != NULL && node->Rchild !=NULL){
-	depth++;
-	if(query.get_row(id)[node->DivDim] < node->DivVal){
-	    getSearchNodeList(node->Lchild, id, query, depth, vn);
-	    if(depth > SP.search_depth)vn.push_back(node->Rchild);
-	}else{
-	    getSearchNodeList(node->Rchild, id, query, depth, vn);
-	    if(depth > SP.search_depth)vn.push_back(node->Lchild);
+
+    void getNeighbors(size_t searchK, const Matrix<DataType>& query){
+	switch(SP.search_method){
+      	case 0:
+	    getNeighbors_nnexp(searchK, query);
+            break;
+	case 1:
+            getNeighbors_kgraph(searchK, query);
+            break;
+	case 2:
+	    getNeighbors_kgraph_unsort(searchK, query);
+	    break;
+	default:
+            std::cout<<"no such searching method"<<std::endl;
 	}
-    }else
-	vn.push_back(node);
-}
-  void getNeighbors_p1(size_t k, const Matrix<DataType>& query){
-      std::cout<<"using tree num "<< SP.tree_num<<std::endl;
-      if(SP.tree_num > tree_roots_.size()){
-        std::cout<<"wrong tree number"<<std::endl;return;
-      }
-
-
-      nn_results.clear();
-//clock_t tt=0;
-if(SP.search_depth<0){std::cout<<"error search depth"<<std::endl;return;}
-
-
-nn_results.resize(query.get_rows());
-//#pragma omp parallel for
-      for(unsigned int cur = 0; cur < query.get_rows(); cur++){
-
-        CandidateHeap Candidates;
-  	boost::dynamic_bitset<> tbflag(features_.get_rows(), false);
-      	boost::dynamic_bitset<> newflag(features_.get_rows(), false);
-        tbflag.reset();
-        newflag.reset();
-
-
-       for(unsigned int i = 0; i < SP.tree_num; i++){
-         
-         Node* leafn = SearchQueryInTree(tree_roots_[i], cur, query, 0);
-         for(size_t j = leafn->StartIdx; j < leafn->EndIdx; j++){
-            size_t nn = LeafLists[i][j];
-
-            if(tbflag.test(nn))continue;
-            else{ tbflag.set(nn); newflag.set(nn);}
-	    DataType dist = distance_->compare(
-              query.get_row(cur), features_.get_row(nn), features_.get_cols());
-	    if(Candidates.size() < (unsigned int)SP.search_init_num || dist < Candidates.begin()->distance){
-                Candidate<DataType> c(nn, dist);
-  		Candidates.insert(c);
-                if(Candidates.size() > (unsigned int)SP.search_init_num)
-              		Candidates.erase(Candidates.begin());
-	    }
-
-         }
-       }
-       int base_n = features_.get_rows();
-
-       while(Candidates.size() < (unsigned int)SP.search_init_num){
-            unsigned int nn = rand() % base_n;
-
-            if(tbflag.test(nn))continue;
-            else{ tbflag.set(nn); newflag.set(nn);}
-
-            Candidate<DataType> c(nn, distance_->compare(
-                  query.get_row(cur), features_.get_row(nn), features_.get_cols())
-                );
-          Candidates.insert(c);
-       }
-
-//clock_t s,f;
-//s = clock();
-       int iter=0;
-         std::vector<int> ids;
-         while(iter++ < SP.search_epoches){
-           //the heap is max heap
-           typename CandidateHeap::reverse_iterator it = Candidates.rbegin();
-           ids.clear();
-           for(int j = 0; j < SP.extend_to && it != Candidates.rend(); j++,it++){
-             if(newflag.test(it->row_id)){
-                newflag.reset(it->row_id);
-
-                typename CandidateHeap::reverse_iterator neighbor = knn_graph[it->row_id].rbegin();
-
-                for(size_t nnk = 0;nnk < params_.K && neighbor != knn_graph[it->row_id].rend(); neighbor++, nnk++){
-                  if(tbflag.test(neighbor->row_id))continue;
-                  else tbflag.set(neighbor->row_id);
-
-                    ids.push_back(neighbor->row_id);
-                }
-               }
-            }
-           for(size_t j = 0; j < ids.size(); j++){
-
-             Candidate<DataType> c(ids[j], distance_->compare(
-                 query.get_row(cur), features_.get_row(ids[j]), features_.get_cols())
-               );
-
-             Candidates.insert(c);
-             newflag.set(ids[j]);
-             if(Candidates.size() > (unsigned int)SP.search_init_num)Candidates.erase(Candidates.begin());
-           }
-         }
-         typename CandidateHeap::reverse_iterator it = Candidates.rbegin();
-         std::vector<int>& res = nn_results[cur];
-         for(size_t i = 0; i < k && it != Candidates.rend();i++, it++)
-            res.push_back(it->row_id);
-
-         //nn_results.push_back(res);
-
-//f = clock();tt += f-s;
-      }//std::cout<<tt*1.0/CLOCKS_PER_SEC<<std::endl;
-  }
-
-void getNeighbors_p2(size_t searchK, const Matrix<DataType>& query){
-      std::cout<<"using tree num "<< SP.tree_num<<std::endl;
-      if(SP.tree_num > tree_roots_.size()){
-        std::cout<<"wrong tree number"<<std::endl;return;
-      }
-
-      nn_results.clear();
-
-      if(SP.search_depth<0){std::cout<<"error search depth"<<std::endl;return;}
-      nn_results.resize(query.get_rows());
-#pragma omp parallel for
-      for(unsigned int cur = 0; cur < query.get_rows(); cur++){
-	  std::vector<Point> knn(10 + 100 +1);
-	  std::vector<Point> results;
-	  std::mt19937 rng(1998);
-	  boost::dynamic_bitset<> flags(features_.get_rows(), false);
-/*	  std::vector<unsigned> search_area;
-	  for(unsigned int i = 0; i < SP.tree_num; i++){
-          	Node* leafn = SearchQueryInTree(tree_roots_[i], cur, query, 0);
-		for(size_t j = leafn->StartIdx; j < leafn->EndIdx; j++){
-            	    size_t nn = LeafLists[i][j];
-		    if(!flags[nn]){flags.set(nn);search_area.push_back(nn);}
-		}
-	  }
-	  flags.reset();
-*/
-	  for (unsigned iter = 0; iter < (unsigned)SP.search_epoches; ++iter) {
-                unsigned L = 0;
-                if (L == 0) {   
-                    std::vector<unsigned> random(100);
-                    GenRandom(rng, &random[0], random.size(), features_.get_rows());
-                    for (unsigned s: random) {
-                        if (!flags[s]) {
-                            knn[L++].id = s;
-                        }
-                    }
-                }
-               
-                for (unsigned k = 0; k < L; ++k) {
-                    flags[knn[k].id] = true;
-                    knn[k].flag = true;
-                    knn[k].dist = distance_->compare(
-                 	query.get_row(cur), features_.get_row(knn[k].id), features_.get_cols());
-                }
-                std::sort(knn.begin(), knn.begin() + L);
-
-                unsigned k =  0;
-                while (k < L) {
-                    unsigned nk = L;
-                    if (knn[k].flag) {
-                        knn[k].flag = false;
-                        unsigned n = knn[k].id;
-                        
-                        unsigned maxM = M[n];
-                        if ((unsigned)SP.extend_to > maxM) maxM = SP.extend_to;
-                        auto const &neighbors = g[n];
-                        if (maxM > neighbors.size()) {
-                            maxM = neighbors.size();
-                        }
-                        for (unsigned m = 0; m < maxM; ++m) {
-                            unsigned id = neighbors[m].id;
-                            //BOOST_VERIFY(id < graph.size());
-                            if (flags[id]) continue;
-                            flags[id] = true;
-                            
-                            DataType dist = distance_->compare(
-                 		query.get_row(cur), features_.get_row(id), features_.get_cols());
-                            Point nn(id, dist);
-                            unsigned r = InsertIntoKnn(&knn[0], L, nn);
-                            //BOOST_VERIFY(r <= L);
-                            //if (r > L) continue;
-                            if (L + 1 < knn.size()) ++L;
-                            if (r < nk) {
-                                nk = r;
-                            }
-                        }
-                    }
-                    if (nk <= k) {
-                        k = nk;
-                    }
-                    else {
-                        ++k;
-                    }
-                }
-                if (L > searchK) L = searchK;
-                if (results.empty()) {
-                    results.reserve(searchK + 1);
-                    results.resize(L + 1);
-                    std::copy(knn.begin(), knn.begin() + L, results.begin());
-                }
-                else {
-                    
-                    for (unsigned l = 0; l < L; ++l) {
-                        unsigned r = InsertIntoKnn(&results[0], results.size() - 1, knn[l]);
-                        if (r < results.size() /* inserted */ && results.size() < (searchK + 1)) {
-                            results.resize(results.size() + 1);
-                        }
-                    }
-                }
-            }
-	std::vector<int>& res = nn_results[cur];
-        for(size_t i = 0; i < searchK ;i++)
-            res.push_back(results[i].id);
-      }
-  }
-
-void getNeighbors_p3(size_t searchK, const Matrix<DataType>& query){
-      std::cout<<"using tree num "<< SP.tree_num<<std::endl;
-      if(SP.tree_num > tree_roots_.size()){
-        std::cout<<"wrong tree number"<<std::endl;return;
-      }
-
-      nn_results.clear();
-
-      if(SP.search_depth<0){std::cout<<"error search depth"<<std::endl;return;}
-omp_init_lock(&rootlock);
-      nn_results.resize(query.get_rows());
-#pragma omp parallel for
-      for(unsigned int cur = 0; cur < query.get_rows(); cur++){
-	  std::vector<Point> knn(searchK + SP.extend_to +1);
-	  std::vector<Point> results;
-	  std::mt19937 rng(1998);
-	  boost::dynamic_bitset<> flags(features_.get_rows(), false);
-	  std::vector<unsigned> search_area;
-	  std::vector<std::vector<Node*> > Vnl;
-	  Vnl.resize(SP.tree_num);
-
-	  for(unsigned int i = 0; i < SP.tree_num; i++){
-          	getSearchNodeList(tree_roots_[i], cur, query, 0, Vnl[i]);		
-	  }
-
-	  bool b = true;
-	  unsigned tmp = 0;
-	  while(b){
-	      b = false;
-	      for(unsigned i = 0; i < Vnl.size(); i++){
-//omp_set_lock(&rootlock);
-//std::cout<<"1.5 "<<cur<<":"<<Vnl[i].size()<<std::endl;
-//omp_unset_lock(&rootlock);
-		  if(tmp < Vnl[i].size()){
-		      b = true;
-		      Node* n = Vnl[i][tmp];
-		      for(unsigned j = n->StartIdx; j < n->EndIdx; j++){
-			  size_t nid = LeafLists[i][j];
-			  if(!flags[nid]){flags.set(nid);search_area.push_back(nid);}
-		      }
-		  }
-	      }
-	      tmp++;
-	  }
-
-	  flags.reset();
-
-	  for (unsigned iter = 0; iter < (unsigned)SP.search_epoches; ++iter) {
-  		unsigned L=0;
-
-            	//std::vector<unsigned> random(100);
-           	//GenRandom(rng, &random[0], random.size(), features_.get_rows());
-	    	unsigned st = iter*SP.extend_to;
-	    	unsigned ed = iter*SP.extend_to+SP.extend_to;
-	    	if(search_area.size() < ed){
-		    std::vector<unsigned> random(SP.extend_to);
-           	    GenRandom(rng, &random[0], random.size(), features_.get_rows());
-		    std::copy(random.begin(),random.end(),std::back_inserter(search_area));
-		}
-
-	    	for (unsigned s = st; s < ed; s++) {
-              	    if (!flags[search_area[s]]) {
-                        knn[L++].id = search_area[s];
-                    }
-                }
-
-               
-                for (unsigned k = 0; k < L; ++k) {
-                    flags[knn[k].id] = true;
-                    knn[k].flag = true;
-                    knn[k].dist = distance_->compare(
-                 	query.get_row(cur), features_.get_row(knn[k].id), features_.get_cols());
-                }
-                std::sort(knn.begin(), knn.begin() + L);
-
-                unsigned k =  0;
-                while (k < L) {
-                    unsigned nk = L;
-                    if (knn[k].flag) {
-                        knn[k].flag = false;
-                        unsigned n = knn[k].id;
-                        
-                        unsigned maxM = M[n];
-                        if ((unsigned)SP.extend_to < maxM) maxM = SP.extend_to;
-                        auto const &neighbors = g[n];
-                        if (maxM > neighbors.size()) {
-                            maxM = neighbors.size();
-                        }
-                        for (unsigned m = 0; m < maxM; ++m) {
-                            unsigned id = neighbors[m].id;
-                            //BOOST_VERIFY(id < graph.size());
-                            if (flags[id]) continue;
-                            flags[id] = true;
-                            
-                            DataType dist = distance_->compare(
-                 		query.get_row(cur), features_.get_row(id), features_.get_cols());
-                            Point nn(id, dist);
-                            unsigned r = InsertIntoKnn(&knn[0], L, nn);
-                            //BOOST_VERIFY(r <= L);
-                            //if (r > L) continue;
-                            if (L + 1 < knn.size()) ++L;
-                            if (r < nk) {
-                                nk = r;
-                            }
-                        }
-                    }
-                    if (nk <= k) {
-                        k = nk;
-                    }
-                    else {
-                        ++k;
-                    }
-                }
-                if (L > searchK) L = searchK;
-                if (results.empty()) {
-                    results.reserve(searchK + 1);
-                    results.resize(L + 1);
-                    std::copy(knn.begin(), knn.begin() + L, results.begin());
-                }
-                else {
-                    
-                    for (unsigned l = 0; l < L; ++l) {
-                        unsigned r = InsertIntoKnn(&results[0], results.size() - 1, knn[l]);
-                        if (r < results.size() /* inserted */ && results.size() < (searchK + 1)) {
-                            results.resize(results.size() + 1);
-                        }
-                    }
-                }
-            }
-	std::vector<int>& res = nn_results[cur];
-        for(size_t i = 0; i < searchK ;i++)
-            res.push_back(results[i].id);
-      }
-  }
-
-void SearchQueryToLeaf(Node* node, const DataType* q, unsigned dep, std::vector<Node*>& node_pool){
-if(node->Lchild != NULL && node->Rchild !=NULL){
-    if(q[node->DivDim] < node->DivVal){
-        SearchQueryToLeaf(node->Lchild, q, dep, node_pool);
-	if(node_pool.size() < dep)
-	    SearchQueryToLeaf(node->Rchild, q, dep, node_pool);
     }
-    else{
-	SearchQueryToLeaf(node->Rchild, q, dep, node_pool);
-	if(node_pool.size() < dep)
-	    SearchQueryToLeaf(node->Lchild, q, dep, node_pool);
-    }
-}
-else
-    node_pool.push_back(node);
-}
-void getNeighbors(size_t searchK, const Matrix<DataType>& query){
+    void getNeighbors_kgraph(size_t searchK, const Matrix<DataType>& query){
       std::cout<<"using tree num "<< SP.tree_num<<std::endl;
       if(SP.tree_num > tree_roots_.size()){
         std::cout<<"wrong tree number"<<std::endl;return;
@@ -701,548 +359,566 @@ void getNeighbors(size_t searchK, const Matrix<DataType>& query){
       nn_results.clear();
 
       if(SP.search_depth<0){std::cout<<"error search depth"<<std::endl;return;}
-//omp_init_lock(&rootlock);
+      if(SP.extend_to < searchK){std::cout<<"search extend factor should be larger than K"<<std::endl;return;}
+      //omp_init_lock(&rootlock);
       nn_results.resize(query.get_rows());
       unsigned dim = features_.get_cols();
-      unsigned pool_size = SP.search_epoches * SP.extend_to;
+      unsigned pool_size = SP.search_epoches * SP.extend_to ;
+
+      #pragma omp parallel for
+      for(unsigned int cur = 0; cur < query.get_rows(); cur++){
+        std::vector<Point> knn(searchK + SP.extend_to +1);
+        CandidateHeap results;
+        std::mt19937 rng(1998);
+        boost::dynamic_bitset<> flags(features_.get_rows(), false);
+
+        std::vector<std::vector<Node*> > Vnl;
+        Vnl.resize(SP.tree_num);
+
+        std::vector<Point> cans;
+        const DataType* q_row = query.get_row(cur);
+        _mm_prefetch((char *)q_row, _MM_HINT_T0);
+        for(unsigned int i = 0; i < SP.tree_num; i++){
+          SearchQueryToLeaf(tree_roots_[i], q_row, SP.search_depth, Vnl[i]);
+        }
+        for(unsigned j = 0; j < SP.search_depth; j++){
+          for(unsigned i = 0; i < Vnl.size(); i++){
+            if(Vnl[i].size() <= j)continue;
+            Node* n = Vnl[i][j];
+            for(unsigned j = n->StartIdx; j < n->EndIdx; j++){
+                 _mm_prefetch((char *)features_.get_row(LeafLists[i][j]), _MM_HINT_T0);
+            }
+            for(unsigned j = n->StartIdx; j < n->EndIdx; j++){
+              size_t nid = LeafLists[i][j];
+              if(!flags[nid]){
+                flags.set(nid);
+                Point p;p.id = nid;
+                p.dist = distance_->compare(q_row, features_.get_row(nid), dim);
+                cans.push_back(p);
+              }
+            }
+
+          }
+          if(cans.size() > pool_size )break;
+        }
+
+        while(cans.size() < pool_size){
+          unsigned tid = rng() % features_.get_rows();
+          if(!flags[tid]){
+            flags[tid] = true;
+            Point p;p.id = tid;
+            p.dist = distance_->compare(q_row, features_.get_row(p.id), dim);
+            cans.push_back(p);
+          }
+        }
+        if(cans.size() >= pool_size)
+          std::partial_sort(cans.begin(),cans.begin()+pool_size,cans.end());
+        //	flags.reset();
+
+        for (unsigned iter = 0; iter < (unsigned)SP.search_epoches; ++iter) {
+          unsigned L = 0;
+          for (unsigned k = 0; k < SP.extend_to; ++k) {
+            knn[k].id = cans[L].id;
+            knn[k].flag = true;flags[knn[k].id] = true;
+            knn[k].dist = cans[L].dist;
+            L++;
+            if(L >= pool_size)break;
+          }
+
+
+          unsigned k =  0;
+          while (k < L) {
+            unsigned nk = L;
+            if (knn[k].flag) {
+              knn[k].flag = false;
+              unsigned n = knn[k].id;
+
+              //unsigned maxM = M[n];
+              unsigned maxM = SP.extend_to;
+              //if ((unsigned)SP.extend_to > maxM) maxM = SP.extend_to;
+              auto const &neighbors = gs[n];
+              if (maxM > neighbors.size()) {
+                maxM = neighbors.size();
+              }
+
+              for(unsigned m = 0; m < maxM; ++m){
+                  _mm_prefetch((char *)features_.get_row(neighbors[m]), _MM_HINT_T0);
+              }
+              for (unsigned m = 0; m < maxM; ++m) {
+                unsigned id = neighbors[m];
+                //BOOST_VERIFY(id < graph.size());
+                if (flags[id]) continue;
+                flags[id] = true;
+
+                DataType dist = distance_->compare(q_row, features_.get_row(id), dim);
+
+                Point nn(id, dist);
+                unsigned r = InsertIntoKnn(&knn[0], L, nn);
+                //BOOST_VERIFY(r <= L);
+                //if (r > L) continue;
+                if (L + 1 < knn.size()) ++L;
+                if (r < nk) {
+                  nk = r;
+                }
+              }
+            }
+            if (nk <= k) {
+              k = nk;
+            }
+            else {
+              ++k;
+            }
+          }
+          if (L > searchK) L = searchK;
+
+          for (unsigned l = 0; l < L; ++l) {
+            if(results.size() < searchK || knn[l].dist < results.begin()->distance){
+              Candidate<DataType> c(knn[l].id, knn[l].dist);
+              results.insert(c);
+              if(results.size() > searchK)results.erase(results.begin());
+            }
+          }
+        }
+        std::vector<int>& res = nn_results[cur];
+        typename CandidateHeap::reverse_iterator it = results.rbegin();
+        for(size_t i = 0; i < searchK ;i++, it++)
+          res.push_back(it->row_id);
+      }
+
+    }
+
+void getNeighbors_kgraph_unsort(size_t searchK, const Matrix<DataType>& query){
+    std::cout<<"using tree num "<< SP.tree_num<<std::endl;
+    if(SP.tree_num > tree_roots_.size()){
+        std::cout<<"wrong tree number"<<std::endl;return;
+    }
+
+    nn_results.clear();
+
+    if(SP.search_depth<0){std::cout<<"error search depth"<<std::endl;return;}
+    if(SP.extend_to < searchK){std::cout<<"search extend factor should be larger than K"<<std::endl;return;}
+   
+    nn_results.resize(query.get_rows());
+    unsigned dim = features_.get_cols();
 
 #pragma omp parallel for
     for(unsigned int cur = 0; cur < query.get_rows(); cur++){
-	std::vector<Point> knn(searchK + SP.extend_to +1);
-	std::vector<Point> results;
-	std::mt19937 rng(1998);
-	boost::dynamic_bitset<> flags(features_.get_rows(), false);
-	 
-	std::vector<std::vector<Node*> > Vnl;
-	Vnl.resize(SP.tree_num);
-	  
-	std::vector<Point> cans;
+	boost::dynamic_bitset<> tbflag(features_.get_rows(), false);
+	CandidateHeap results;
 	const DataType* q_row = query.get_row(cur);
-	_mm_prefetch((char *)q_row, _MM_HINT_T0);
+        _mm_prefetch((char *)q_row, _MM_HINT_T0);
+	SP.search_init_num = SP.search_epoches * SP.extend_to;
+				//initialize the pool
+	std::vector<std::vector<Node*>> NodeCandi;
+	unsigned int lsize = SP.search_init_num*2 / (5*SP.tree_num) + 1;
 	for(unsigned int i = 0; i < SP.tree_num; i++){
-            SearchQueryToLeaf(tree_roots_[i], q_row, SP.search_depth, Vnl[i]);
+	    std::vector<Node*> NodeList;
+	    getSearchNodeList(tree_roots_[i], query.get_row(cur), NodeList, lsize);
+	    NodeCandi.push_back(NodeList);
 	}
-	for(unsigned j = 0; j < SP.search_depth; j++){
-	    for(unsigned i = 0; i < Vnl.size(); i++){
-		Node* n = Vnl[i][j];
-	      	for(unsigned j = n->StartIdx; j < n->EndIdx; j++){
-		     _mm_prefetch((char *)features_.get_row(LeafLists[i][j]), _MM_HINT_T0);
-	      	}
-	      	for(unsigned j = n->StartIdx; j < n->EndIdx; j++){
-		    size_t nid = LeafLists[i][j];
-		    if(!flags[nid]){
-	                flags.set(nid);
-		        Point p;p.id = nid;
-		        p.dist = distance_->compare(q_row, features_.get_row(nid), dim);
-		        cans.push_back(p);		    
-		    }
-	        }
-	      
+	std::vector<int> pool(SP.search_init_num);
+	unsigned int p = 0;
+	for(unsigned int ni = 0; ni < lsize; ni++){
+	    for(unsigned int i = 0; i < NodeCandi.size(); i++){
+	    	Node* leafn = NodeCandi[i][ni];
+	     	for(size_t j = leafn->StartIdx; j < leafn->EndIdx && p < (unsigned int)SP.search_init_num; j++){
+		    size_t nn = LeafLists[i][j];
+		    if(tbflag.test(nn))continue;
+		    tbflag.set(nn);
+		    pool[p++]=(nn);
+	    	}
+	        if(p >= (unsigned int)SP.search_init_num) break;
 	    }
-	    if(cans.size() > pool_size){
-		std::partial_sort(cans.begin(),cans.begin()+pool_size,cans.end());
-	    }
-	}
-	if(cans.size() < pool_size){
-	    std::vector<unsigned> rand(pool_size - cans.size());
-	    GenRandom(rng, &rand[0], rand.size(), features_.get_rows());
-	    for(unsigned i = 0; i < rand.size(); i++){
-		Point p;p.id = rand[i];
-		p.dist = distance_->compare(q_row, features_.get_row(p.id), dim);
-		cans.push_back(p);	
-	    }
+	    if(p >= (unsigned int)SP.search_init_num) break;
 	}
 
-	flags.reset();
-
-	  for (unsigned iter = 0; iter < (unsigned)SP.search_epoches; ++iter) {
-  		unsigned L=SP.extend_to;
-                for (unsigned k = 0; k < L; ++k) {
-		    knn[k].id = cans[k].id;
-                    flags[knn[k].id] = true;
-                    knn[k].flag = true;
-                    knn[k].dist = cans[k].dist;
-                }
-                
-
-                unsigned k =  0;
-                while (k < L) {
-                    unsigned nk = L;
-                    if (knn[k].flag) {
-                        knn[k].flag = false;
-                        unsigned n = knn[k].id;
-                        
-                        //unsigned maxM = M[n];
-			unsigned maxM = SP.extend_to;
-                        //if ((unsigned)SP.extend_to > maxM) maxM = SP.extend_to;
-                        auto const &neighbors = g[n];
-                        if (maxM > neighbors.size()) {
-                            maxM = neighbors.size();
-                        }
-			
-			for(unsigned m = 0; m < maxM; ++m){
-		    	    _mm_prefetch((char *)features_.get_row(neighbors[m].id), _MM_HINT_T0);
-			}
-                        for (unsigned m = 0; m < maxM; ++m) {
-                            unsigned id = neighbors[m].id;
-                            //BOOST_VERIFY(id < graph.size());
-                            if (flags[id]) continue;
-                            flags[id] = true;
-                            
-                            DataType dist = distance_->compare(q_row, features_.get_row(id), dim);
-			    
-                            Point nn(id, dist);
-                            unsigned r = InsertIntoKnn(&knn[0], L, nn);
-                            //BOOST_VERIFY(r <= L);
-                            //if (r > L) continue;
-                            if (L + 1 < knn.size()) ++L;
-                            if (r < nk) {
-                                nk = r;
-                            }
-                        }
-                    }
-                    if (nk <= k) {
-                        k = nk;
-                    }
-                    else {
-                        ++k;
-                    }
-                }
-                if (L > searchK) L = searchK;
-                if (results.empty()) {
-                    results.reserve(searchK + 1);
-                    results.resize(L + 1);
-                    std::copy(knn.begin(), knn.begin() + L, results.begin());
-                }
-                else {
-                    
-                    for (unsigned l = 0; l < L; ++l) {
-                        unsigned r = InsertIntoKnn(&results[0], results.size() - 1, knn[l]);
-                        if (r < results.size() /* inserted */ && results.size() < (searchK + 1)) {
-                            results.resize(results.size() + 1);
-                        }
-                    }
-                }
+	int base_n = features_.get_rows();
+	while(p < (unsigned int)SP.search_init_num){
+	    unsigned int nn = rand() % base_n;
+	    if(tbflag.test(nn))continue;
+	    tbflag.set(nn);
+	    pool[p++]=(nn);
+	}
+	tbflag.reset();
+	std::vector<Point> knn(searchK + SP.extend_to +1);
+        for (unsigned iter = 0; iter < (unsigned)SP.search_epoches; ++iter) {
+	    unsigned int L = 0;
+            for(unsigned j=iter*SP.extend_to; j < (iter+1)*SP.extend_to && j < (unsigned)SP.search_init_num; j++){
+          	if(!tbflag.test(pool[j]))
+            	    knn[L++].id = pool[j];
             }
-	std::vector<int>& res = nn_results[cur];
-        for(size_t i = 0; i < searchK ;i++)
-            res.push_back(results[i].id);
-      }
+	    for(unsigned int k = 0; k < L; ++k){
+	  	_mm_prefetch((char *)features_.get_row(knn[k].id), _MM_HINT_T0);
+	    }
+            for (unsigned int k = 0; k < L; ++k) {
+            	tbflag.set(knn[k].id);
+         	knn[k].flag = true;
+          	knn[k].dist = distance_->compare(q_row, features_.get_row(knn[k].id), dim);
+            }
+            std::sort(knn.begin(), knn.begin() + L);
 
-  }
 
-Node* SearchQueryToLeaf2(Node* node, unsigned id, const Matrix<DataType>& q){
-    
-    Node* child = node;
-    while(child->Lchild != NULL){
-	if(q.get_row(id)[child->DivDim] < child->DivVal)
-            child = child->Lchild;
-      	else
-	    child = child->Rchild;
+            unsigned k =  0;
+            while (k < L) {
+            	unsigned nk = L;
+           	if (knn[k].flag){
+		    knn[k].flag = false;
+              	    unsigned n = knn[k].id;
+
+             	    auto const &neighbors = gs[n];
+                    for(unsigned m = 0; m < neighbors.size(); ++m){
+		    	_mm_prefetch((char *)features_.get_row(neighbors[m]), _MM_HINT_T0);
+		    }
+                    for (unsigned m = 0; m < neighbors.size(); ++m) {
+                    	unsigned id = neighbors[m];
+                    	if (tbflag[id]) continue;
+                    	tbflag[id] = true;
+
+                    	DataType dist = distance_->compare(q_row, features_.get_row(id), dim);
+
+                    	Point nn(id, dist);
+                    	unsigned r = InsertIntoKnn(&knn[0], L, nn);
+
+                    	if (L + 1 < knn.size()) ++L;
+                    	if (r < nk)nk = r;
+		    }
+		}
+		if (nk <= k)k = nk;
+		else ++k;
+	    }
+	    if (L > searchK) L = searchK;
+
+	    for (unsigned l = 0; l < L; ++l) {
+	        if(results.size() < searchK || knn[l].dist < results.begin()->distance){
+	       	    Candidate<DataType> c(knn[l].id, knn[l].dist);
+               	    results.insert(c);
+               	    if(results.size() > searchK)results.erase(results.begin());
+		}
+	    }
+	}
+        std::vector<int>& res = nn_results[cur];
+        typename CandidateHeap::reverse_iterator it = results.rbegin();
+        for(size_t i = 0; i < searchK ;i++, it++)
+            res.push_back(it->row_id);
     }
-    return child;
 }
-void getNeighbors_p5(size_t searchK, const Matrix<DataType>& query){
+
+
+    void getSearchNodeList(Node* node, const DataType* q, std::vector<Node*>& vn, unsigned int lsize){
+      if(vn.size() >= lsize)
+        return;
+
+      if(node->Lchild != NULL && node->Rchild !=NULL){
+        if(q[node->DivDim] < node->DivVal){
+          getSearchNodeList(node->Lchild, q, vn, lsize);
+          getSearchNodeList(node->Rchild, q, vn, lsize);
+        }else{
+          getSearchNodeList(node->Rchild, q, vn, lsize);
+          getSearchNodeList(node->Lchild, q, vn, lsize);
+        }
+      }else
+        vn.push_back(node);
+    }
+
+    void getNeighbors_nnexp(size_t K, const Matrix<DataType>& query){
       std::cout<<"using tree num "<< SP.tree_num<<std::endl;
       if(SP.tree_num > tree_roots_.size()){
         std::cout<<"wrong tree number"<<std::endl;return;
       }
 
       nn_results.clear();
-
-      if(SP.search_depth<0){std::cout<<"error search depth"<<std::endl;return;}
-
       nn_results.resize(query.get_rows());
       unsigned dim = features_.get_cols();
+
+      
+
 #pragma omp parallel for
       for(unsigned int cur = 0; cur < query.get_rows(); cur++){
-	  std::vector<Point> knn(searchK + SP.extend_to +1);
-	  std::vector<Point> results;
-	  std::mt19937 rng(1998);
-	  boost::dynamic_bitset<> flags(features_.get_rows(), false);
-	  std::vector<unsigned> search_area;
-	  std::vector<std::vector<Node*> > Vnl;
-	  Vnl.resize(SP.tree_num);
-	  
-	  std::vector<Point> cans;
-	  _mm_prefetch((char *)query.get_row(cur), _MM_HINT_T0);
-	  for(unsigned int i = 0; i < SP.tree_num; i++){
-          	Node* n = SearchQueryToLeaf2(tree_roots_[i], cur, query);
-		for(unsigned j = n->StartIdx; j < n->EndIdx; j++){
-		    _mm_prefetch((char *)features_.get_row(LeafLists[i][j]), _MM_HINT_T0);
-		}
-		for(unsigned j = n->StartIdx; j < n->EndIdx; j++){
-		    size_t nid = LeafLists[i][j];
-		    if(!flags[nid]){
-			flags.set(nid);
-			Point p;p.id = nid;
-			p.dist = distance_->compare(
-                 	  query.get_row(cur), features_.get_row(nid), dim);
-			cans.push_back(p);
-		    }
-	        }
-	  }
-	  std::partial_sort(cans.begin(),cans.begin()+SP.extend_to,cans.end());
+	boost::dynamic_bitset<> tbflag(features_.get_rows(), false);
+        boost::dynamic_bitset<> newflag(features_.get_rows(), true);
+        tbflag.reset();
+        newflag.set();
 
-	  flags.reset();
-
-	  for (unsigned iter = 0; iter < (unsigned)SP.search_epoches; ++iter) {
-  		unsigned L=SP.extend_to;
-                for (unsigned k = 0; k < L; ++k) {
-		    knn[k].id = cans[k].id;
-                    flags[knn[k].id] = true;
-                    knn[k].flag = true;
-                    knn[k].dist = cans[k].dist;
-                }
-                
-
-                unsigned k =  0;
-                while (k < L) {
-                    unsigned nk = L;
-                    if (knn[k].flag) {
-                        knn[k].flag = false;
-                        unsigned n = knn[k].id;
-                        
-                        unsigned maxM = M[n];
-                        if ((unsigned)SP.extend_to > maxM) maxM = SP.extend_to;
-                        auto const &neighbors = g[n];
-                        if (maxM > neighbors.size()) {
-                            maxM = neighbors.size();
-                        }
-			
-			for(unsigned m = 0; m < maxM; ++m){
-		    	    _mm_prefetch((char *)features_.get_row(neighbors[m].id), _MM_HINT_T0);
-			}
-                        for (unsigned m = 0; m < maxM; ++m) {
-                            unsigned id = neighbors[m].id;
-                            //BOOST_VERIFY(id < graph.size());
-                            if (flags[id]) continue;
-                            flags[id] = true;
-                            
-                            DataType dist = distance_->compare(
-                 		query.get_row(cur), features_.get_row(id), dim);
-			    
-                            Point nn(id, dist);
-                            unsigned r = InsertIntoKnn(&knn[0], L, nn);
-                            //BOOST_VERIFY(r <= L);
-                            //if (r > L) continue;
-                            if (L + 1 < knn.size()) ++L;
-                            if (r < nk) {
-                                nk = r;
-                            }
-                        }
-                    }
-                    if (nk <= k) {
-                        k = nk;
-                    }
-                    else {
-                        ++k;
-                    }
-                }
-                if (L > searchK) L = searchK;
-                if (results.empty()) {
-                    results.reserve(searchK + 1);
-                    results.resize(L + 1);
-                    std::copy(knn.begin(), knn.begin() + L, results.begin());
-                }
-                else {
-                    
-                    for (unsigned l = 0; l < L; ++l) {
-                        unsigned r = InsertIntoKnn(&results[0], results.size() - 1, knn[l]);
-                        if (r < results.size() /* inserted */ && results.size() < (searchK + 1)) {
-                            results.resize(results.size() + 1);
-                        }
-                    }
-                }
+        std::vector<std::vector<Node*>> NodeCandi;
+        //unsigned int lsize = SP.search_init_num / 5 + 1;
+	const DataType* q_row = query.get_row(cur);
+        _mm_prefetch((char *)q_row, _MM_HINT_T0);
+        unsigned int lsize = SP.search_init_num*2 / (5*SP.tree_num) + 1;
+        for(unsigned int i = 0; i < SP.tree_num; i++){
+            std::vector<Node*> NodeList;
+            getSearchNodeList(tree_roots_[i], q_row, NodeList, lsize);
+            NodeCandi.push_back(NodeList);
+        }
+        std::vector<int> pool(SP.search_init_num);
+        unsigned int p = 0;
+        for(unsigned int ni = 0; ni < lsize; ni++){
+            for(unsigned int i = 0; i < NodeCandi.size(); i++){
+                Node* leafn = NodeCandi[i][ni];
+                for(size_t j = leafn->StartIdx; j < leafn->EndIdx && p < (unsigned int)SP.search_init_num; j++){
+                    size_t nn = LeafLists[i][j];
+              	    if(tbflag.test(nn))continue;
+              	    tbflag.set(nn);
+              	    pool[p++]=(nn);
+            	}
+            if(p >= (unsigned int)SP.search_init_num) break;
             }
-	std::vector<int>& res = nn_results[cur];
-        for(size_t i = 0; i < searchK ;i++)
-            res.push_back(results[i].id);
+            if(p >= (unsigned int)SP.search_init_num) break;
+        }
+        int base_n = features_.get_rows();
+        while(p < (unsigned int)SP.search_init_num){
+            unsigned int nn = rand() % base_n;
+            if(tbflag.test(nn))continue;
+            tbflag.set(nn);
+            pool[p++]=(nn);
+        }
+
+
+        std::vector<std::pair<float,size_t>> result;
+	//for(unsigned int i=0; i<pool.size();i++){
+	  //  _mm_prefetch((char *)features_.get_row(pool[i]), _MM_HINT_T0);
+	//}
+  	unsigned cache_blocksz = 80;
+        for(unsigned int i=0; i*cache_blocksz<pool.size();i++){
+	    unsigned s = i*cache_blocksz;
+	    unsigned t = s + cache_blocksz > pool.size() ? pool.size() : s+cache_blocksz;
+	    unsigned s_ = s;
+	    while(s<t){
+		_mm_prefetch((char *)features_.get_row(pool[s]), _MM_HINT_T0);
+		s++;
+	    }
+            while(s_<t){
+		result.push_back(std::make_pair(distance_->compare(q_row, features_.get_row(pool[s_]), dim),pool[s_]));
+		s_++;
+	    }
+        }
+        std::partial_sort(result.begin(), result.begin() + SP.extend_to, result.end());
+        result.resize(SP.extend_to);
+        pool.clear();
+        for(unsigned j = 0; j < SP.extend_to; j++)
+          pool.push_back(result[j].second);
+
+        int iter=0;
+        std::vector<int> ids;
+        while(iter++ < SP.search_epoches){
+            ids.clear();
+            for(unsigned j = 0; j < SP.extend_to ; j++){
+            	if(newflag.test( pool[j] )){
+              	newflag.reset(pool[j]);
+
+	        for(unsigned neighbor=0; neighbor < gs[pool[j]].size(); neighbor++){
+        	    unsigned id = gs[pool[j]][neighbor];
+
+		    if(tbflag.test(id))continue;
+                    else tbflag.set(id);
+
+                    ids.push_back(id);
+              	}
+            }
+	}
+	  //for(unsigned int j=0; j<ids.size();j++){
+	    //_mm_prefetch((char *)features_.get_row(ids[j]), _MM_HINT_T0);
+	  //}
+        for(size_t j = 0; j * cache_blocksz< ids.size(); j++){
+	    unsigned s = j * cache_blocksz;
+	    unsigned t = s + cache_blocksz > ids.size() ? ids.size() : s+cache_blocksz;
+	    unsigned s_ = s;
+	    while(s<t){
+		_mm_prefetch((char *)features_.get_row(ids[s]), _MM_HINT_T0);
+		s++;
+	    }
+            while(s_<t){
+		result.push_back(std::make_pair(distance_->compare(q_row, features_.get_row(ids[s_]), dim),ids[s_]));
+		s_++;
+	    }	
+            //result.push_back(std::make_pair(distance_->compare(q_row, features_.get_row(ids[j]), dim),ids[j]));
+        }
+        std::partial_sort(result.begin(), result.begin() + SP.extend_to, result.end());
+        result.resize(SP.extend_to);
+        pool.clear();
+        for(unsigned j = 0; j < SP.extend_to; j++)
+            pool.push_back(result[j].second);
+        }
+
+        if(K<SP.extend_to)
+          pool.resize(K);
+
+        //nn_results.push_back(pool);
+        std::vector<int>& res = nn_results[cur];
+        for(unsigned i = 0; i < K ;i++)
+          res.push_back(pool[i]);
       }
-  }
-
-void getSearchNodeList1(Node* node, size_t id, const Matrix<DataType>& query, std::vector<Node*>& vn, unsigned int lsize){
-  if(vn.size() >= lsize)
-    return;
-
-  if(node->Lchild != NULL && node->Rchild !=NULL){
-    if(query.get_row(id)[node->DivDim] < node->DivVal){
-      getSearchNodeList1(node->Lchild, id, query, vn, lsize);
-      getSearchNodeList1(node->Rchild, id, query, vn, lsize);
-    }else{
-      getSearchNodeList1(node->Rchild, id, query, vn, lsize);
-      getSearchNodeList1(node->Lchild, id, query, vn, lsize);
     }
-  }else
-    vn.push_back(node);
-}
-
-void getNeighbors_p6(size_t K, const Matrix<DataType>& query){
-	std::cout<<"using tree num "<< SP.tree_num<<std::endl;
-	if(SP.tree_num > tree_roots_.size()){
-		std::cout<<"wrong tree number"<<std::endl;return;
-	}
-
-	
-
-	nn_results.clear();
-
-	for(unsigned int cur = 0; cur < query.get_rows(); cur++){
-		boost::dynamic_bitset<> tbflag(features_.get_rows(), false);
-		boost::dynamic_bitset<> newflag(features_.get_rows(), true);
-		std::vector<std::vector<Node*>> NodeCandi;
-		unsigned int lsize = SP.search_init_num / 5 + 1;
-		for(unsigned int i = 0; i < SP.tree_num; i++){
-			std::vector<Node*> NodeList;
-			getSearchNodeList1(tree_roots_[i], cur, query, NodeList, lsize);
-			NodeCandi.push_back(NodeList);
-		}
-		newflag.set();
-		
-		std::vector<int> pool(SP.search_init_num);
-		unsigned int p = 0;
-
-		for(unsigned int ni = 0; ni < lsize; ni++){
-			for(unsigned int i = 0; i < NodeCandi.size(); i++){
-				Node* leafn = NodeCandi[i][ni];
-
-				for(size_t j = leafn->StartIdx; j < leafn->EndIdx && p < (unsigned int)SP.search_init_num; j++){
-					size_t nn = LeafLists[i][j];
-					if(tbflag.test(nn))continue;
-					tbflag.set(nn);
-					pool[p++] = nn;
-				}
-				if(p >= (unsigned int)SP.search_init_num) break;
-			}
-			if(p >= (unsigned int)SP.search_init_num) break;
-		}
-
-		int base_n = features_.get_rows();
-		while(p < (unsigned int)SP.search_init_num){
-			unsigned int nn = rand() % base_n;
-			if(tbflag.test(nn))continue;
-			tbflag.set(nn);
-			pool[p++]=(nn);
-		}
-
-		std::vector<std::pair<float,size_t>> result;
-		for(unsigned int i=0; i<pool.size();i++){
-			result.push_back(std::make_pair(distance_->compare(query.get_row(cur), features_.get_row(pool[i]), features_.get_cols()),pool[i]));
-		}
-		std::partial_sort(result.begin(), result.begin() + SP.extend_to, result.end());
-		result.resize(SP.extend_to);
-		pool.clear();
-		for(unsigned j = 0; j < SP.extend_to; j++)
-			pool.push_back(result[j].second);
-
-		int iter=0;
-		std::vector<int> ids;
-		while(iter++ < SP.search_epoches){
-			//the heap is max heap
-
-			ids.clear();
-			for(unsigned j = 0; j < SP.extend_to ; j++){
-				if(newflag.test( pool[j] )){
-					newflag.reset(pool[j]);
-
-					for(unsigned neighbor=0; neighbor < g[pool[j]].size(); neighbor++){
-						unsigned id = g[pool[j]][neighbor].id;
-
-						if(tbflag.test(id))continue;
-						else tbflag.set(id);
-
-						ids.push_back(id);
-					}
-				}
-			}
-
-			for(size_t j = 0; j < ids.size(); j++){
-				result.push_back(std::make_pair(distance_->compare(query.get_row(cur), features_.get_row(ids[j]), features_.get_cols()),ids[j]));
-			}
-			std::partial_sort(result.begin(), result.begin() + SP.extend_to, result.end());
-			result.resize(SP.extend_to);
-			pool.clear();
-			for(unsigned j = 0; j < SP.extend_to; j++)
-				pool.push_back(result[j].second);
-		}
-
-		if(K<SP.extend_to)
-			pool.resize(K);
-
-		nn_results.push_back(pool);
-	}
-}
 
 
     int DepthFirstWrite(std::fstream& out, struct Node *root){
       if(root==NULL) return 0;
-    	int left_cnt = DepthFirstWrite(out, root->Lchild);
-    	int right_cnt = DepthFirstWrite(out, root->Rchild);
+      int left_cnt = DepthFirstWrite(out, root->Lchild);
+      int right_cnt = DepthFirstWrite(out, root->Rchild);
 
-    	//std::cout << root->StartIdx <<":" << root->EndIdx<< std::endl;
-    	out.write((char *)&(root->DivDim), sizeof(root->DivDim));
-    	out.write((char *)&(root->DivVal), sizeof(root->DivVal));
-    	out.write((char *)&(root->StartIdx), sizeof(root->StartIdx));
-    	out.write((char *)&(root->EndIdx), sizeof(root->EndIdx));
-    	out.write((char *)&(root->Lchild), sizeof(root->Lchild));
-    	out.write((char *)&(root->Rchild), sizeof(root->Rchild));
-    	return (left_cnt + right_cnt + 1);
+      //std::cout << root->StartIdx <<":" << root->EndIdx<< std::endl;
+      out.write((char *)&(root->DivDim), sizeof(root->DivDim));
+      out.write((char *)&(root->DivVal), sizeof(root->DivVal));
+      out.write((char *)&(root->StartIdx), sizeof(root->StartIdx));
+      out.write((char *)&(root->EndIdx), sizeof(root->EndIdx));
+      out.write((char *)&(root->Lchild), sizeof(root->Lchild));
+      out.write((char *)&(root->Rchild), sizeof(root->Rchild));
+      return (left_cnt + right_cnt + 1);
     }
     struct Node* DepthFirstBuildTree(std::vector<struct Node *>& tree_nodes){
-      std::vector<Node*> root_serial;
-    	typename std::vector<struct Node*>::iterator it = tree_nodes.begin();
-      for( ; it!=tree_nodes.end(); it++){
-        Node* tmp = *it;
-        size_t rsize = root_serial.size();
-        if(rsize<2){
-        	root_serial.push_back(tmp);
-      	//continue;
-        }
-        else{
-    			Node *last1 = root_serial[rsize-1];
-    			Node *last2 = root_serial[rsize-2];
-    			if(last1->EndIdx == tmp->EndIdx && last2->StartIdx == tmp->StartIdx){
-    				tmp->Rchild = last1;
-    				tmp->Lchild = last2;
-    				root_serial.pop_back();
-    				root_serial.pop_back();
-    			}
-    			root_serial.push_back(tmp);
-        }
+        std::vector<Node*> root_serial;
+        typename std::vector<struct Node*>::iterator it = tree_nodes.begin();
+        for( ; it!=tree_nodes.end(); it++){
+          Node* tmp = *it;
+          size_t rsize = root_serial.size();
+          if(rsize<2){
+            root_serial.push_back(tmp);
+            //continue;
+          }
+          else{
+            Node *last1 = root_serial[rsize-1];
+            Node *last2 = root_serial[rsize-2];
+            if(last1->EndIdx == tmp->EndIdx && last2->StartIdx == tmp->StartIdx){
+              tmp->Rchild = last1;
+              tmp->Lchild = last2;
+              root_serial.pop_back();
+              root_serial.pop_back();
+            }
+            root_serial.push_back(tmp);
+          }
 
-    	}
-    	if(root_serial.size()!=1){
-    		std::cout << "Error constructing trees" << std::endl;
-    		return NULL;
-    	}
-    	return root_serial[0];
+        }
+        if(root_serial.size()!=1){
+          std::cout << "Error constructing trees" << std::endl;
+          return NULL;
+        }
+        return root_serial[0];
     }
     void read_data(char *filename){
       std::ifstream in(filename, std::ios::binary|std::ios::in);
-    	if(!in.is_open()){std::cout<<"open file error"<<std::endl;exit(-10087);}
-    	unsigned int K,tree_num;
-    	size_t dim,num;
+      if(!in.is_open()){std::cout<<"open file error"<<std::endl;exit(-10087);}
+      unsigned int K,tree_num;
+      size_t dim,num;
 
-    	//read file head
-    	in.read((char*)&(K),sizeof(unsigned int));
-    	in.read((char*)&(tree_num),sizeof(unsigned int));
-    	in.read((char*)&(num),sizeof(size_t));
-    	in.read((char*)&(dim),sizeof(size_t));
+      //read file head
+      in.read((char*)&(K),sizeof(unsigned int));
+      in.read((char*)&(tree_num),sizeof(unsigned int));
+      in.read((char*)&(num),sizeof(size_t));
+      in.read((char*)&(dim),sizeof(size_t));
 
-    	SP.tree_num = tree_num;
+      SP.tree_num = tree_num;
 
-    	//read trees
+      //read trees
 
       tree_roots_.clear();
-    	for(unsigned int i=0;i<tree_num;i++){// for each tree
-    		int node_num, node_size;
-    		in.read((char*)&(node_num),sizeof(int));
-    		in.read((char*)&(node_size),sizeof(int));
+      for(unsigned int i=0;i<tree_num;i++){// for each tree
+        int node_num, node_size;
+        in.read((char*)&(node_num),sizeof(int));
+        in.read((char*)&(node_size),sizeof(int));
 
-    		std::vector<struct Node *> tree_nodes;
-    		for(int j=0;j<node_num;j++){
-    			struct Node *tmp = new struct Node();
-    			in.read((char*)&(tmp->DivDim),sizeof(tmp->DivDim));
-    			in.read((char*)&(tmp->DivVal),sizeof(tmp->DivVal));
-    			in.read((char*)&(tmp->StartIdx),sizeof(tmp->StartIdx));
-    			in.read((char*)&(tmp->EndIdx),sizeof(tmp->EndIdx));
-    			in.read((char*)&(tmp->Lchild),sizeof(tmp->Lchild));
-    			in.read((char*)&(tmp->Rchild),sizeof(tmp->Rchild));
-    			tmp->Lchild = NULL;
-    			tmp->Rchild = NULL;
-    			tree_nodes.push_back(tmp);
+        std::vector<struct Node *> tree_nodes;
+        for(int j=0;j<node_num;j++){
+          struct Node *tmp = new struct Node();
+          in.read((char*)&(tmp->DivDim),sizeof(tmp->DivDim));
+          in.read((char*)&(tmp->DivVal),sizeof(tmp->DivVal));
+          in.read((char*)&(tmp->StartIdx),sizeof(tmp->StartIdx));
+          in.read((char*)&(tmp->EndIdx),sizeof(tmp->EndIdx));
+          in.read((char*)&(tmp->Lchild),sizeof(tmp->Lchild));
+          in.read((char*)&(tmp->Rchild),sizeof(tmp->Rchild));
+          tmp->Lchild = NULL;
+          tmp->Rchild = NULL;
+          tree_nodes.push_back(tmp);
 
 
-    		}
+        }
         //std::cout<<"build "<<i<<std::endl;
-    		struct Node *root = DepthFirstBuildTree(tree_nodes);
-    		if(root==NULL){ exit(-11); }
-    		tree_roots_.push_back(root);
-    	}
+        struct Node *root = DepthFirstBuildTree(tree_nodes);
+        if(root==NULL){ exit(-11); }
+        tree_roots_.push_back(root);
+      }
 
-    	//read index range
-    	LeafLists.clear();
-    	for(unsigned int i=0;i<tree_num;i++){
+      //read index range
+      LeafLists.clear();
+      for(unsigned int i=0;i<tree_num;i++){
 
-    		std::vector<unsigned> leaves;
-    		for(unsigned int j=0;j<num; j++){
-    			unsigned leaf;
-    			in.read((char*)&(leaf),sizeof(int));
-    			leaves.push_back(leaf);
-    		}
-    		LeafLists.push_back(leaves);
-    	}
+        std::vector<unsigned> leaves;
+        for(unsigned int j=0;j<num; j++){
+          unsigned leaf;
+          in.read((char*)&(leaf),sizeof(int));
+          leaves.push_back(leaf);
+        }
+        LeafLists.push_back(leaves);
+      }
 
-    	//read knn graph
-    	knn_graph.clear();
-    	for(size_t i = 0; i < num; i++){
-    		CandidateHeap heap;
-    		for(size_t j =0; j < K ; j++ ){
-    			int id;
-    			in.read((char*)&id, sizeof(int));
-    			Candidate<DataType> can(id, -1);
-    			heap.insert(can);
-    		}
-    		knn_graph.push_back(heap);
-    	}
-    	in.close();
+      //read knn graph
+      knn_graph.clear();
+      for(size_t i = 0; i < num; i++){
+        CandidateHeap heap;
+        for(size_t j =0; j < K ; j++ ){
+          int id;
+          in.read((char*)&id, sizeof(int));
+          Candidate<DataType> can(id, -1);
+          heap.insert(can);
+        }
+        knn_graph.push_back(heap);
+      }
+      in.close();
     }
     void save_data(char *filename, unsigned int K, size_t num, size_t dim){
       std::fstream out(filename, std::ios::binary|std::ios::out);
-    	if(!out.is_open()){std::cout<<"open file error"<<std::endl;exit(-10086);}
-    	unsigned int tree_num = tree_roots_.size();
+      if(!out.is_open()){std::cout<<"open file error"<<std::endl;exit(-10086);}
+      unsigned int tree_num = tree_roots_.size();
 
-    	//write file head
-    	out.write((char *)&(K), sizeof(unsigned int));
-    	out.write((char *)&(tree_num), sizeof(unsigned int));
-    	out.write((char *)&(num), sizeof(size_t)); //feature point number
-    	out.write((char *)&(dim), sizeof(size_t)); //feature dim
+      //write file head
+      out.write((char *)&(K), sizeof(unsigned int));
+      out.write((char *)&(tree_num), sizeof(unsigned int));
+      out.write((char *)&(num), sizeof(size_t)); //feature point number
+      out.write((char *)&(dim), sizeof(size_t)); //feature dim
 
-    	//write trees
-    	typename std::vector<Node *>::iterator it;//int cnt=0;
-    	for(it=tree_roots_.begin(); it!=tree_roots_.end(); it++){
-    		//write tree nodes with depth first trace
+      //write trees
+      typename std::vector<Node *>::iterator it;//int cnt=0;
+      for(it=tree_roots_.begin(); it!=tree_roots_.end(); it++){
+        //write tree nodes with depth first trace
 
 
-    		size_t offset_node_num = out.tellp();
+        size_t offset_node_num = out.tellp();
 
-    		out.seekp(sizeof(int),std::ios::cur);
+        out.seekp(sizeof(int),std::ios::cur);
 
-    		unsigned int node_size = sizeof(struct Node);
-    		out.write((char *)&(node_size), sizeof(int));
+        unsigned int node_size = sizeof(struct Node);
+        out.write((char *)&(node_size), sizeof(int));
 
-    		unsigned int node_num = DepthFirstWrite(out, *it);
+        unsigned int node_num = DepthFirstWrite(out, *it);
 
-    		out.seekg(offset_node_num,std::ios::beg);
+        out.seekg(offset_node_num,std::ios::beg);
 
-    		out.write((char *)&(node_num), sizeof(int));
+        out.write((char *)&(node_num), sizeof(int));
 
-    		out.seekp(0,std::ios::end);
+        out.seekp(0,std::ios::end);
         //std::cout<<"tree: "<<cnt++<<" written, node: "<<node_num<<" at offset " << offset_node_num <<std::endl;
-    	}
+      }
 
-    	if(LeafLists.size()!=tree_num){ std::cout << "leaf_size!=tree_num" << std::endl; exit(-6); }
+      if(LeafLists.size()!=tree_num){ std::cout << "leaf_size!=tree_num" << std::endl; exit(-6); }
 
-    	for(unsigned int i=0; i<tree_num; i++){
-    		for(unsigned int j=0;j<num;j++){
-    			out.write((char *)&(LeafLists[i][j]), sizeof(int));
-    		}
-    	}
+      for(unsigned int i=0; i<tree_num; i++){
+        for(unsigned int j=0;j<num;j++){
+          out.write((char *)&(LeafLists[i][j]), sizeof(int));
+        }
+      }
 
-    	//write knn-graph
+      //write knn-graph
 
-    	if(knn_graph.size()!=num){std::cout << "Error:" << std::endl; exit(-1);}
-    	for(size_t i = 0; i < knn_graph.size(); i++){
-    		typename CandidateHeap::reverse_iterator it = knn_graph[i].rbegin();
-    		for(size_t j =0; j < K && it!= knn_graph[i].rend(); j++,it++ ){
-    			int id = it->row_id;
-    			out.write((char*)&id, sizeof(int));
-    		}
-    	}
+      if(knn_graph.size()!=num){std::cout << "Error:" << std::endl; exit(-1);}
+      for(size_t i = 0; i < knn_graph.size(); i++){
+        typename CandidateHeap::reverse_iterator it = knn_graph[i].rbegin();
+        for(size_t j =0; j < K && it!= knn_graph[i].rend(); j++,it++ ){
+          int id = it->row_id;
+          out.write((char*)&id, sizeof(int));
+        }
+      }
 
-    	out.close();
+      out.close();
     }
-/*
+    /*
     Node* divideTree(std::mt19937& rng, int* indices, size_t count, size_t offset){
       Node* node = new Node();
       if(count <= params_.TNS){
@@ -1316,7 +992,7 @@ void getNeighbors_p6(size_t K, const Matrix<DataType>& query){
 
       return node;
     }
-*/
+     */
 
     void meanSplit(std::mt19937& rng, unsigned* indices, unsigned count, unsigned& index, unsigned& cutdim, DataType& cutval){
       size_t veclen_ = features_.get_cols();
@@ -1330,24 +1006,24 @@ void getNeighbors_p6(size_t K, const Matrix<DataType>& query){
        */
       unsigned cnt = std::min((unsigned)SAMPLE_NUM+1, count);
       for (unsigned j = 0; j < cnt; ++j) {
-          const DataType* v = features_.get_row(indices[j]);
-          for (size_t k=0; k<veclen_; ++k) {
-              mean_[k] += v[k];
-          }
+        const DataType* v = features_.get_row(indices[j]);
+        for (size_t k=0; k<veclen_; ++k) {
+          mean_[k] += v[k];
+        }
       }
       DataType div_factor = DataType(1)/cnt;
       for (size_t k=0; k<veclen_; ++k) {
-          mean_[k] *= div_factor;
+        mean_[k] *= div_factor;
       }
 
       /* Compute variances (no need to divide by count). */
 
       for (unsigned j = 0; j < cnt; ++j) {
-          const DataType* v = features_.get_row(indices[j]);
-          for (size_t k=0; k<veclen_; ++k) {
-              DataType dist = v[k] - mean_[k];
-              var_[k] += dist * dist;
-          }
+        const DataType* v = features_.get_row(indices[j]);
+        for (size_t k=0; k<veclen_; ++k) {
+          DataType dist = v[k] - mean_[k];
+          var_[k] += dist * dist;
+        }
       }
 
       /* Select one of the highest variance indices at random. */
@@ -1375,18 +1051,18 @@ void getNeighbors_p6(size_t K, const Matrix<DataType>& query){
       int left = 0;
       int right = count-1;
       for (;; ) {
-          while (left<=right && features_.get_row(indices[left])[cutdim]<cutval) ++left;
-          while (left<=right && features_.get_row(indices[right])[cutdim]>=cutval) --right;
-          if (left>right) break;
-          std::swap(indices[left], indices[right]); ++left; --right;
+        while (left<=right && features_.get_row(indices[left])[cutdim]<cutval) ++left;
+        while (left<=right && features_.get_row(indices[right])[cutdim]>=cutval) --right;
+        if (left>right) break;
+        std::swap(indices[left], indices[right]); ++left; --right;
       }
       lim1 = left;//lim1 is the id of the leftmost point <= cutval
       right = count-1;
       for (;; ) {
-          while (left<=right && features_.get_row(indices[left])[cutdim]<=cutval) ++left;
-          while (left<=right && features_.get_row(indices[right])[cutdim]>cutval) --right;
-          if (left>right) break;
-          std::swap(indices[left], indices[right]); ++left; --right;
+        while (left<=right && features_.get_row(indices[left])[cutdim]<=cutval) ++left;
+        while (left<=right && features_.get_row(indices[right])[cutdim]>cutval) --right;
+        if (left>right) break;
+        std::swap(indices[left], indices[right]); ++left; --right;
       }
       lim2 = left;//lim2 is the id of the leftmost point >cutval
     }
@@ -1396,21 +1072,21 @@ void getNeighbors_p6(size_t K, const Matrix<DataType>& query){
 
       //Create a list of the indices of the top RAND_DIM values.
       for (size_t i = 0; i < features_.get_cols(); ++i) {
-          if ((num < RAND_DIM)||(v[i] > v[topind[num-1]])) {
-              // Put this element at end of topind.
-              if (num < RAND_DIM) {
-                  topind[num++] = i;            // Add to list.
-              }
-              else {
-                  topind[num-1] = i;         // Replace last element.
-              }
-              // Bubble end value down to right location by repeated swapping. sort the varience in decrease order
-              int j = num - 1;
-              while (j > 0  &&  v[topind[j]] > v[topind[j-1]]) {
-                  std::swap(topind[j], topind[j-1]);
-                  --j;
-              }
+        if ((num < RAND_DIM)||(v[i] > v[topind[num-1]])) {
+          // Put this element at end of topind.
+          if (num < RAND_DIM) {
+            topind[num++] = i;            // Add to list.
           }
+          else {
+            topind[num-1] = i;         // Replace last element.
+          }
+          // Bubble end value down to right location by repeated swapping. sort the varience in decrease order
+          int j = num - 1;
+          while (j > 0  &&  v[topind[j]] > v[topind[j-1]]) {
+            std::swap(topind[j], topind[j-1]);
+            --j;
+          }
+        }
       }
       // Select a random integer in range [0,num-1], and return that index.
       int rnd = rng()%num;
@@ -1467,35 +1143,33 @@ void getNeighbors_p6(size_t K, const Matrix<DataType>& query){
             DataType dist = distance_->compare(
                 features_.get_row(tmpfea), features_.get_row(feature_id), features_.get_cols());
 
-{LockGuard g(nhoods[tmpfea].lock);
+            {LockGuard g(nhoods[tmpfea].lock);
             if(knn_graph[tmpfea].size() < params_.S || dist < knn_graph[tmpfea].begin()->distance){
               Candidate<DataType> c1(feature_id, dist);
-              
               knn_graph[tmpfea].insert(c1);
               if(knn_graph[tmpfea].size() > params_.S)knn_graph[tmpfea].erase(knn_graph[tmpfea].begin());
-              
-              
+
+
             }
             else if(nhoods[tmpfea].nn_new.size() < params_.S * 2){
-              
+
               nhoods[tmpfea].nn_new.push_back(feature_id);
-              
+
             }
-}
-{LockGuard g(nhoods[feature_id].lock);
+            }
+            {LockGuard g(nhoods[feature_id].lock);
             if(knn_graph[feature_id].size() < params_.S || dist < knn_graph[feature_id].begin()->distance){
               Candidate<DataType> c1(tmpfea, dist);
-              
               knn_graph[feature_id].insert(c1);
               if(knn_graph[feature_id].size() > params_.S)knn_graph[feature_id].erase(knn_graph[feature_id].begin());
-              
+
             }
             else if(nhoods[feature_id].nn_new.size() < params_.S * 2){
-              
+
               nhoods[feature_id].nn_new.push_back(tmpfea);
-              
+
             }
-}
+            }
           }
         }
       }
@@ -1507,20 +1181,20 @@ void getNeighbors_p6(size_t K, const Matrix<DataType>& query){
   protected:
     enum
     {
-        /**
-         * To improve efficiency, only SAMPLE_NUM random values are used to
-         * compute the mean and variance at each level when building a tree.
-         * A value of 100 seems to perform as well as using all values.
-         */
-        SAMPLE_NUM = 100,
-        /**
-         * Top random dimensions to consider
-         *
-         * When creating random trees, the dimension on which to subdivide is
-         * selected at random from among the top RAND_DIM dimensions with the
-         * highest variance.  A value of 5 works well.
-         */
-        RAND_DIM=5
+      /**
+       * To improve efficiency, only SAMPLE_NUM random values are used to
+       * compute the mean and variance at each level when building a tree.
+       * A value of 100 seems to perform as well as using all values.
+       */
+      SAMPLE_NUM = 100,
+      /**
+       * Top random dimensions to consider
+       *
+       * When creating random trees, the dimension on which to subdivide is
+       * selected at random from among the top RAND_DIM dimensions with the
+       * highest variance.  A value of 5 works well.
+       */
+      RAND_DIM=5
     };
 
     int TreeNum;
@@ -1540,27 +1214,27 @@ void getNeighbors_p6(size_t K, const Matrix<DataType>& query){
     //kgraph code
 
     static void GenRandom (std::mt19937& rng, unsigned *addr, unsigned size, unsigned N) {
-        for (unsigned i = 0; i < size; ++i) {
-            addr[i] = rng() % (N - size);
+      for (unsigned i = 0; i < size; ++i) {
+        addr[i] = rng() % (N - size);
+      }
+      std::sort(addr, addr + size);
+      for (unsigned i = 1; i < size; ++i) {
+        if (addr[i] <= addr[i-1]) {
+          addr[i] = addr[i-1] + 1;
         }
-        std::sort(addr, addr + size);
-        for (unsigned i = 1; i < size; ++i) {
-            if (addr[i] <= addr[i-1]) {
-                addr[i] = addr[i-1] + 1;
-            }
-        }
-        unsigned off = rng() % N;
-        for (unsigned i = 0; i < size; ++i) {
-            addr[i] = (addr[i] + off) % N;
-        }
+      }
+      unsigned off = rng() % N;
+      for (unsigned i = 0; i < size; ++i) {
+        addr[i] = (addr[i] + off) % N;
+      }
     }
 
 
-void DFSbuild(Node* node, std::mt19937& rng, unsigned* indices, unsigned count, unsigned offset){
-//omp_set_lock(&rootlock);
-//std::cout<<node->treeid<<":"<<offset<<":"<<count<<std::endl;
-//omp_unset_lock(&rootlock);
-    if(count <= params_.TNS){
+    void DFSbuild(Node* node, std::mt19937& rng, unsigned* indices, unsigned count, unsigned offset){
+      //omp_set_lock(&rootlock);
+      //std::cout<<node->treeid<<":"<<offset<<":"<<count<<std::endl;
+      //omp_unset_lock(&rootlock);
+      if(count <= params_.TNS){
         node->DivDim = -1;
         node->Lchild = NULL;
         node->Rchild = NULL;
@@ -1568,7 +1242,7 @@ void DFSbuild(Node* node, std::mt19937& rng, unsigned* indices, unsigned count, 
         node->EndIdx = offset + count;
         //add points
 
-    }else{
+      }else{
         unsigned idx;
         unsigned cutdim;
         DataType cutval;
@@ -1577,138 +1251,224 @@ void DFSbuild(Node* node, std::mt19937& rng, unsigned* indices, unsigned count, 
         node->DivVal = cutval;
         node->StartIdx = offset;
         node->EndIdx = offset + count;
-	Node* nodeL = new Node(); Node* nodeR = new Node();
+        Node* nodeL = new Node(); Node* nodeR = new Node();
         node->Lchild = nodeL;
-	nodeL->treeid = node->treeid;
-	DFSbuild(nodeL, rng, indices, idx, offset);
+        nodeL->treeid = node->treeid;
+        DFSbuild(nodeL, rng, indices, idx, offset);
         node->Rchild = nodeR;
-	nodeR->treeid = node->treeid;
-	DFSbuild(nodeR, rng, indices+idx, count-idx, offset+idx);
+        nodeR->treeid = node->treeid;
+        DFSbuild(nodeR, rng, indices+idx, count-idx, offset+idx);
+      }
     }
-}
 
-void DFStest(unsigned level, unsigned dim, Node* node){
-	if(node->Lchild !=NULL){
-	    DFStest(++level, node->DivDim, node->Lchild);
-	    //if(level > 15)
-	      std::cout<<"dim: "<<node->DivDim<<"--cutval: "<<node->DivVal<<"--S: "<<node->StartIdx<<"--E: "<<node->EndIdx<<" TREE: "<<node->treeid<<std::endl;
-	    if(node->Lchild->Lchild ==NULL){
-		std::vector<unsigned>& tmp = LeafLists[node->treeid];
-		   for(unsigned i = node->Rchild->StartIdx; i < node->Rchild->EndIdx; i++)
-			std::cout<<features_.get_row(tmp[i])[node->DivDim]<<" ";
-		   std::cout<<std::endl;
-	    }
-	}
-	else if(node->Rchild !=NULL){
-	    DFStest(++level, node->DivDim, node->Rchild);
-	}
-	else{
-	   std::cout<<"dim: "<<dim<<std::endl;
-	   std::vector<unsigned>& tmp = LeafLists[node->treeid];
-	   for(unsigned i = node->StartIdx; i < node->EndIdx; i++)
-		std::cout<<features_.get_row(tmp[i])[dim]<<" ";
-	   std::cout<<std::endl;
-	}
-}
-
-    void initGraph(){
-//initial
-        unsigned N = features_.get_rows();
-	unsigned seed = 1998;
-	std::mt19937 rng(seed);
-        nhoods.resize(N);
-        knn_graph.resize(N);
-	for (auto &nhood: nhoods) {
-	    //nhood.nn_new.resize(params_.S * 2);
-	    nhood.pool.resize(params_.L+1);
-	    nhood.radius = std::numeric_limits<float>::max();
-	}
-
-
-//build tree
-	std::vector<int> indices(N);
-	LeafLists.resize(TreeNum);
-	std::vector<Node*> ActiveSet;
-	std::vector<Node*> NewSet;
-	for(unsigned i = 0; i < (unsigned)TreeNum; i++){
-	    Node* node = new Node;
-            node->DivDim = -1;
-            node->Lchild = NULL;
-            node->Rchild = NULL;
-            node->StartIdx = 0;
-            node->EndIdx = N;
-	    node->treeid = i;
-	    tree_roots_.push_back(node);
-	    ActiveSet.push_back(node);
+    void DFStest(unsigned level, unsigned dim, Node* node){
+      if(node->Lchild !=NULL){
+        DFStest(++level, node->DivDim, node->Lchild);
+        //if(level > 15)
+        std::cout<<"dim: "<<node->DivDim<<"--cutval: "<<node->DivVal<<"--S: "<<node->StartIdx<<"--E: "<<node->EndIdx<<" TREE: "<<node->treeid<<std::endl;
+        if(node->Lchild->Lchild ==NULL){
+          std::vector<unsigned>& tmp = LeafLists[node->treeid];
+          for(unsigned i = node->Rchild->StartIdx; i < node->Rchild->EndIdx; i++)
+            std::cout<<features_.get_row(tmp[i])[node->DivDim]<<" ";
+          std::cout<<std::endl;
         }
-#pragma omp parallel for
-        for(unsigned i = 0; i < N; i++)indices[i] = i;
-#pragma omp parallel for
-	for(unsigned i = 0; i < (unsigned)TreeNum; i++){
-	    std::vector<unsigned>& myids = LeafLists[i];
-            myids.resize(N);
-	    std::copy(indices.begin(), indices.end(),myids.begin());
-            std::random_shuffle(myids.begin(), myids.end());
-	}
-omp_init_lock(&rootlock);
-	while(!ActiveSet.empty() && ActiveSet.size() < 1100){
-#pragma omp parallel for
-	    for(unsigned i = 0; i < ActiveSet.size(); i++){
-		Node* node = ActiveSet[i];
-	        unsigned mid;
-		unsigned cutdim;
-		DataType cutval;
-		std::mt19937 rng(seed ^ omp_get_thread_num());
-		std::vector<unsigned>& myids = LeafLists[node->treeid];
+      }
+      else if(node->Rchild !=NULL){
+        DFStest(++level, node->DivDim, node->Rchild);
+      }
+      else{
+        std::cout<<"dim: "<<dim<<std::endl;
+        std::vector<unsigned>& tmp = LeafLists[node->treeid];
+        for(unsigned i = node->StartIdx; i < node->EndIdx; i++)
+          std::cout<<features_.get_row(tmp[i])[dim]<<" ";
+        std::cout<<std::endl;
+      }
+    }
+    void buildTrees(){
+	unsigned N = features_.get_rows();
+      	unsigned seed = 1998;
+      	std::mt19937 rng(seed);
+      	nhoods.resize(N);
+      	g.resize(N);
+      	boost::dynamic_bitset<> visited(N, false);
+      	knn_graph.resize(N);
+      	for (auto &nhood: nhoods) {
+        //nhood.nn_new.resize(params_.S * 2);
+            nhood.pool.resize(params_.L+1);
+            nhood.radius = std::numeric_limits<float>::max();
+      }
 
-		meanSplit(rng, &myids[0]+node->StartIdx, node->EndIdx - node->StartIdx, mid, cutdim, cutval);
 
-		node->DivDim = cutdim;
-		node->DivVal = cutval;
-		//node->StartIdx = offset;
-		//node->EndIdx = offset + count;
-		Node* nodeL = new Node(); Node* nodeR = new Node();
-		nodeR->treeid = nodeL->treeid = node->treeid;
-		nodeL->StartIdx = node->StartIdx;
-		nodeL->EndIdx = node->StartIdx+mid;
-		nodeR->StartIdx = nodeL->EndIdx;
-		nodeR->EndIdx = node->EndIdx;
-		node->Lchild = nodeL;
-		node->Rchild = nodeR;
-		omp_set_lock(&rootlock);
-		if(mid>params_.S)NewSet.push_back(nodeL);
-		if(nodeR->EndIdx - nodeR->StartIdx > params_.S)NewSet.push_back(nodeR);
-		omp_unset_lock(&rootlock);
-	    }
-	    ActiveSet.resize(NewSet.size());
-	    std::copy(NewSet.begin(), NewSet.end(),ActiveSet.begin());
-	    NewSet.clear();
-	}
+      //build tree
+      std::vector<int> indices(N);
+      LeafLists.resize(TreeNum);
+      std::vector<Node*> ActiveSet;
+      std::vector<Node*> NewSet;
+      for(unsigned i = 0; i < (unsigned)TreeNum; i++){
+        Node* node = new Node;
+        node->DivDim = -1;
+        node->Lchild = NULL;
+        node->Rchild = NULL;
+        node->StartIdx = 0;
+        node->EndIdx = N;
+        node->treeid = i;
+        tree_roots_.push_back(node);
+        ActiveSet.push_back(node);
+      }
 #pragma omp parallel for
-	for(unsigned i = 0; i < ActiveSet.size(); i++){
-	    Node* node = ActiveSet[i];
-//omp_set_lock(&rootlock);
-//std::cout<<i<<":"<<node->EndIdx-node->StartIdx<<std::endl;
-//omp_unset_lock(&rootlock);
-	    std::mt19937 rng(seed ^ omp_get_thread_num());
-	    std::vector<unsigned>& myids = LeafLists[node->treeid];
-	    DFSbuild(node, rng, &myids[0]+node->StartIdx, node->EndIdx-node->StartIdx, node->StartIdx);
-	}
-//DFStest(0,0,tree_roots_[0]);
-//build tree completed
+      for(unsigned i = 0; i < N; i++)indices[i] = i;
+#pragma omp parallel for
+      for(unsigned i = 0; i < (unsigned)TreeNum; i++){
+        std::vector<unsigned>& myids = LeafLists[i];
+        myids.resize(N);
+        std::copy(indices.begin(), indices.end(),myids.begin());
+        std::random_shuffle(myids.begin(), myids.end());
+      }
+      omp_init_lock(&rootlock);
+      while(!ActiveSet.empty() && ActiveSet.size() < 1100){
+#pragma omp parallel for
+        for(unsigned i = 0; i < ActiveSet.size(); i++){
+          Node* node = ActiveSet[i];
+          unsigned mid;
+          unsigned cutdim;
+          DataType cutval;
+          std::mt19937 rng(seed ^ omp_get_thread_num());
+          std::vector<unsigned>& myids = LeafLists[node->treeid];
 
-	for(size_t i = 0; i < (unsigned)TreeNumBuild; i++){
-            getMergeLevelNodeList(tree_roots_[i], i ,0);
-	}
+          meanSplit(rng, &myids[0]+node->StartIdx, node->EndIdx - node->StartIdx, mid, cutdim, cutval);
+
+          node->DivDim = cutdim;
+          node->DivVal = cutval;
+          //node->StartIdx = offset;
+          //node->EndIdx = offset + count;
+          Node* nodeL = new Node(); Node* nodeR = new Node();
+          nodeR->treeid = nodeL->treeid = node->treeid;
+          nodeL->StartIdx = node->StartIdx;
+          nodeL->EndIdx = node->StartIdx+mid;
+          nodeR->StartIdx = nodeL->EndIdx;
+          nodeR->EndIdx = node->EndIdx;
+          node->Lchild = nodeL;
+          node->Rchild = nodeR;
+          omp_set_lock(&rootlock);
+          if(mid>params_.S)NewSet.push_back(nodeL);
+          if(nodeR->EndIdx - nodeR->StartIdx > params_.S)NewSet.push_back(nodeR);
+          omp_unset_lock(&rootlock);
+        }
+        ActiveSet.resize(NewSet.size());
+        std::copy(NewSet.begin(), NewSet.end(),ActiveSet.begin());
+        NewSet.clear();
+      }
+#pragma omp parallel for
+      for(unsigned i = 0; i < ActiveSet.size(); i++){
+        Node* node = ActiveSet[i];
+        //omp_set_lock(&rootlock);
+        //std::cout<<i<<":"<<node->EndIdx-node->StartIdx<<std::endl;
+        //omp_unset_lock(&rootlock);
+        std::mt19937 rng(seed ^ omp_get_thread_num());
+        std::vector<unsigned>& myids = LeafLists[node->treeid];
+        DFSbuild(node, rng, &myids[0]+node->StartIdx, node->EndIdx-node->StartIdx, node->StartIdx);
+      }
+    }
+    void initGraph(){
+      //initial
+      unsigned N = features_.get_rows();
+      unsigned seed = 1998;
+      std::mt19937 rng(seed);
+      nhoods.resize(N);
+      g.resize(N);
+      boost::dynamic_bitset<> visited(N, false);
+      knn_graph.resize(N);
+      for (auto &nhood: nhoods) {
+        //nhood.nn_new.resize(params_.S * 2);
+        nhood.pool.resize(params_.L+1);
+        nhood.radius = std::numeric_limits<float>::max();
+      }
+
+
+      //build tree
+      std::vector<int> indices(N);
+      LeafLists.resize(TreeNum);
+      std::vector<Node*> ActiveSet;
+      std::vector<Node*> NewSet;
+      for(unsigned i = 0; i < (unsigned)TreeNum; i++){
+        Node* node = new Node;
+        node->DivDim = -1;
+        node->Lchild = NULL;
+        node->Rchild = NULL;
+        node->StartIdx = 0;
+        node->EndIdx = N;
+        node->treeid = i;
+        tree_roots_.push_back(node);
+        ActiveSet.push_back(node);
+      }
+#pragma omp parallel for
+      for(unsigned i = 0; i < N; i++)indices[i] = i;
+#pragma omp parallel for
+      for(unsigned i = 0; i < (unsigned)TreeNum; i++){
+        std::vector<unsigned>& myids = LeafLists[i];
+        myids.resize(N);
+        std::copy(indices.begin(), indices.end(),myids.begin());
+        std::random_shuffle(myids.begin(), myids.end());
+      }
+      omp_init_lock(&rootlock);
+      while(!ActiveSet.empty() && ActiveSet.size() < 1100){
+#pragma omp parallel for
+        for(unsigned i = 0; i < ActiveSet.size(); i++){
+          Node* node = ActiveSet[i];
+          unsigned mid;
+          unsigned cutdim;
+          DataType cutval;
+          std::mt19937 rng(seed ^ omp_get_thread_num());
+          std::vector<unsigned>& myids = LeafLists[node->treeid];
+
+          meanSplit(rng, &myids[0]+node->StartIdx, node->EndIdx - node->StartIdx, mid, cutdim, cutval);
+
+          node->DivDim = cutdim;
+          node->DivVal = cutval;
+          //node->StartIdx = offset;
+          //node->EndIdx = offset + count;
+          Node* nodeL = new Node(); Node* nodeR = new Node();
+          nodeR->treeid = nodeL->treeid = node->treeid;
+          nodeL->StartIdx = node->StartIdx;
+          nodeL->EndIdx = node->StartIdx+mid;
+          nodeR->StartIdx = nodeL->EndIdx;
+          nodeR->EndIdx = node->EndIdx;
+          node->Lchild = nodeL;
+          node->Rchild = nodeR;
+          omp_set_lock(&rootlock);
+          if(mid>params_.S)NewSet.push_back(nodeL);
+          if(nodeR->EndIdx - nodeR->StartIdx > params_.S)NewSet.push_back(nodeR);
+          omp_unset_lock(&rootlock);
+        }
+        ActiveSet.resize(NewSet.size());
+        std::copy(NewSet.begin(), NewSet.end(),ActiveSet.begin());
+        NewSet.clear();
+      }
+#pragma omp parallel for
+      for(unsigned i = 0; i < ActiveSet.size(); i++){
+        Node* node = ActiveSet[i];
+        //omp_set_lock(&rootlock);
+        //std::cout<<i<<":"<<node->EndIdx-node->StartIdx<<std::endl;
+        //omp_unset_lock(&rootlock);
+        std::mt19937 rng(seed ^ omp_get_thread_num());
+        std::vector<unsigned>& myids = LeafLists[node->treeid];
+        DFSbuild(node, rng, &myids[0]+node->StartIdx, node->EndIdx-node->StartIdx, node->StartIdx);
+      }
+      //DFStest(0,0,tree_roots_[0]);
+      //build tree completed
+
+      for(size_t i = 0; i < (unsigned)TreeNumBuild; i++){
+        getMergeLevelNodeList(tree_roots_[i], i ,0);
+      }
 
 #pragma omp parallel for	
-	for(size_t i = 0; i < mlNodeList.size(); i++){
-            mergeSubGraphs(mlNodeList[i].second, mlNodeList[i].first);
-	}
-//saveGraph("sift.graph");
+      for(size_t i = 0; i < mlNodeList.size(); i++){
+        mergeSubGraphs(mlNodeList[i].second, mlNodeList[i].first);
+      }
+
 
 #pragma omp parallel
-	{
+      {
 #ifdef _OPENMP
         std::mt19937 rng(seed ^ omp_get_thread_num());
 #else
@@ -1718,47 +1478,48 @@ omp_init_lock(&rootlock);
 
 #pragma omp for
         for (unsigned n = 0; n < N; ++n) {
-            auto &nhood = nhoods[n];
-            Points &pool = nhood.pool;
-            if(nhood.nn_new.size()<params_.S*2){
-		nhood.nn_new.resize(params_.S*2);
-		GenRandom(rng, &nhood.nn_new[0], nhood.nn_new.size(), N);
-	    }
+          auto &nhood = nhoods[n];
+          Points &pool = nhood.pool;
+          if(nhood.nn_new.size()<params_.S*2){
+            nhood.nn_new.resize(params_.S*2);
+            GenRandom(rng, &nhood.nn_new[0], nhood.nn_new.size(), N);
+          }
 
-	    
-            GenRandom(rng, &random[0], random.size(), N);
-            nhood.L = params_.S;
-            nhood.Range = params_.S;
-	    while(knn_graph[n].size() < params_.S){
-		unsigned rand_id = rng() % N;
-		DataType dist = distance_->compare(
-                	features_.get_row(n), features_.get_row(rand_id), features_.get_cols());
-		Candidate<DataType> c(rand_id,dist);
-		knn_graph[n].insert(c);
-	    }
 
-//omp_set_lock(&rootlock);
-//if(knn_graph[n].size() < nhood.L)std::cout<<n<<":"<<knn_graph[n].size()<<std::endl;
-//omp_unset_lock(&rootlock);
-            unsigned i = 0;
-	    typename CandidateHeap::reverse_iterator it = knn_graph[n].rbegin();
-            for (unsigned l = 0; l < nhood.L; ++l) {
-                if (random[i] == n) ++i;
-                auto &nn = nhood.pool[l];
-                nn.id = it->row_id;//random[i++];
-		nhood.nn_new[l] = it->row_id;
-                nn.dist = it->distance;//distance_->compare(features_.get_row(n), features_.get_row(nn.id), features_.get_cols());
-                nn.flag = true;it++;
-		//if(it == knn_graph[n].rend())break;
-            }
-            sort(pool.begin(), pool.begin() + nhood.L);
+          GenRandom(rng, &random[0], random.size(), N);
+          nhood.L = params_.S;
+          nhood.Range = params_.S;
+          while(knn_graph[n].size() < params_.S){
+            unsigned rand_id = rng() % N;
+            DataType dist = distance_->compare(
+                features_.get_row(n), features_.get_row(rand_id), features_.get_cols());
+            Candidate<DataType> c(rand_id,dist);
+            knn_graph[n].insert(c);
+          }
+
+          //omp_set_lock(&rootlock);
+          //if(knn_graph[n].size() < nhood.L)std::cout<<n<<":"<<knn_graph[n].size()<<std::endl;
+          //omp_unset_lock(&rootlock);
+          unsigned i = 0;
+          typename CandidateHeap::reverse_iterator it = knn_graph[n].rbegin();
+          for (unsigned l = 0; l < nhood.L; ++l) {
+            if (random[i] == n) ++i;
+            auto &nn = nhood.pool[l];
+            nn.id = it->row_id;//random[i++];
+            nhood.nn_new[l] = it->row_id;
+            nn.dist = it->distance;//distance_->compare(features_.get_row(n), features_.get_row(nn.id), features_.get_cols());
+            nn.flag = true;it++;
+            //if(it == knn_graph[n].rend())break;
+          }
+          sort(pool.begin(), pool.begin() + nhood.L);
         }
-}
+      }
+      knn_graph.clear();
       std::cout<<"initial completed"<<std::endl;
 
     }
 
-  };
+};
 
 }
 #endif

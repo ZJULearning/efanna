@@ -6,7 +6,9 @@ EFANNA is also flexible to adopt all kinds of hierarchical structure for initial
 
 What's new
 -------
-OpenMP supported! kNN graph building on SIFT1M achieves 97.5% accuracy within 45 seconds (on a machine with intel i7-4790K CPU)!     
+Interfaces change.    
+AVX instructions supported.    
+algorithm improved.    
 
 Benchmark data set
 -------
@@ -16,10 +18,10 @@ ANN search performance
 ------
 The performance was tested without parallelism.   
 
-![SIFT1nn](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/SIFT_1nn.png)    
-![SIFT100nn](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/SIFT_100nn.png)    
-![GIST1nn](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/GIST_1nn.png)    
-![GIST100nn](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/GIST_100nn.png)   
+![SIFT1nn](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/SIFT_1nn.png)     
+![SIFT100nn](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/SIFT_100nn.png)     
+![GIST1nn](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/GIST_1nn.png)     
+![GIST100nn](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/GIST_100nn.png)    
 Compared Algorithms:   
 * [kGraph](http://www.kgraph.org)  
 * [flann](http://www.cs.ubc.ca/research/flann/)   
@@ -30,8 +32,8 @@ kNN Graph Construction Performance
 ------
 The performance was tested without parallelism.  
 
-![SIFT1nnGraph](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/SIFT_graph.png)    
-![SIFT100nnGraph](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/GIST_graph.png)   
+![SIFT1nnGraph](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/SIFT_graph.png)     
+![SIFT100nnGraph](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/GIST_graph.png)    
 
 Compared Algorithms:   
 * [Kgraph](http://www.kgraph.org) (same with NN-descent)   
@@ -40,27 +42,27 @@ Compared Algorithms:
 * [FastKNN](http://link.springer.com/chapter/10.1007/978-3-642-40991-2_42) : Fast kNN Graph Construction with Locality Sensitive Hashing  
 * [LargeVis](http://dl.acm.org/citation.cfm?id=2883041) : Visualizing Large-scale and High-dimensional Data    
 
-How To Complie
+How To Complie    
 -------
-Go to the root directory of EFANNA and make.
+Go to the root directory of EFANNA and make.    
 
 	cd efanna/
 	make
 
-How To Use
+How To Use    
 ------
 EFANNA uses a composite index to carry out ANN search, which includes an approximate kNN graph and a number of tree structures. They can be built by this library as a whole or seperately.  
   
 You may build the kNN graph seperately for other use, like other graph based machine learning algorithms.  
  
- Below are some demos.  
-* kNN graph building :
+ Below are some demos.   
+* kNN graph building :    
 
-    	cd efanna/samples/
-		./sample/efanna_index_buildgraph sift_base.fvecs sift.graph 8 8 7 30 25 10 10
+		cd efanna/samples/   
+		./efanna_index_buildgraph sift_base.fvecs sift.graph 8 8 7 30 25 10 10   
 		  
 		  
- Meaning of the parameters(from left to right):
+ Meaning of the parameters(from left to right):    
 
 	sift\_base.fvecs -- database points  
 	sift.graph -- graph built by EFANNA   
@@ -69,58 +71,59 @@ You may build the kNN graph seperately for other use, like other graph based mac
 	8 -- conquer-to-depeth(smaller is more accurate but slower)   
 	8 -- number of iterations to build the graph 
 	 
-	30 -- L (larger is more accurate but slower)  
+	30 -- L (larger is more accurate but slower, no smaller than K)  
 	25 -- check (larger is more accurate but slower, no smaller than K)  
 	10 -- K, number of neighbors for each point    
 	10 -- S (larger is more accurate but slower)
 	
 * tree building :   
     
-        cd efanna/samples/
-		./sample/efanna_index_buildtree sift_base.fvecs sift.trees 16
+		cd efanna/samples/
+		./efanna_index_buildtrees sift_base.fvecs sift.trees 32
         
   Meaning of the parameters(from left to right):   
   
-  sift\_base.fvecs -- database points  
-  sift.trees -- struncated KD-trees built by EFANNA  
-  16 -- number of trees to build   
+	sift\_base.fvecs -- database points  
+	sift.trees -- struncated KD-trees built by EFANNA  
+	32 -- number of trees to build   
 * index building at one time:   
-  
-  		cd efanna/samples/
-		./sample/efanna_index sift_base.fvecs sift.trees sitf.graph 32 8 8 100 100 100 10 8
+
+		cd efanna/samples/
+		./efanna_index_buildall sift_base.fvecs sift.trees sift.graph 32 8 8 200 200 100 10 8
    
-	Meaning of the parameters(from left to right)   
+Meaning of the parameters(from left to right)   
 	
-   sift\_base.fvecs -- database points  
-   sift.trees -- struncated KD-trees built by EFANNA  
-   sift.graph --
-   32 -- number of trees in total for building index   
-   8 -- conquer-to-depth    
-   8 -- iteration number    
-   100 -- L   
-   100 -- check    
-   100 -- K    
-   10 -- S   
-   8 -- 8 trees out of 16 are used for building graph
+	sift\_base.fvecs -- database points  
+	sift.trees -- struncated KD-trees built by EFANNA  
+	sift.graph --
+	32 -- number of trees in total for building index   
+	8 -- conquer-to-depth    
+	8 -- iteration number    
+	100 -- L   
+	100 -- check    
+	100 -- K    
+	10 -- S   
+	8 -- 8 out of 32 trees are used for building graph
    
 * ANN search
-        
-        cd efanna/samples/
-		./sample/efanna_sample_kdsearch sift_base.fvecs sift.trees sift.graph sift_query.fvecs sift.results 32 1 1 50 50 10
+
+		cd efanna/samples/
+		./sample/efanna_search sift_base.fvecs sift.trees sift.graph sift_query.fvecs sift.results 16 6 4 1200 200 10 0
   
   Meaning of the parameters(from left to right):   
   
-  sift\_base.fvecs -- database points  
-  sift.trees -- prebuilt struncated KD-trees used for search  
-  sift.graph -- prebuilt kNN graph   
-  sift\_query -- sift query points  
-  sift.results -- path to save ANN search results of given query   
-  32 -- number of trees to use (no greater than the number of prebuilt trees)  
-  1 -- search-up-depth (depth of leaf node is 1, larger is more accurate but slower)   
-  1 -- number of trials   
-  50 -- extending factor (larger is more accurate but slower)   
-  50 -- pool size (larger is more accurate but slower)   
-  10 -- required number of returned neighbors (i.e. k of k-NN)   
+	sift\_base.fvecs -- database points  
+	sift.trees -- prebuilt struncated KD-trees used for search  
+	sift.graph -- prebuilt kNN graph   
+	sift\_query -- sift query points  
+	sift.results -- path to save ANN search results of given query   
+	16 -- number of trees to use (no greater than the number of prebuilt trees)   
+	6 -- search-up-depth (depth of leaf node is 1, larger is more accurate but slower)   
+	4 -- number of epoches   
+	1200 -- pool size factor (larger is more accurate but slower)   
+	200 -- extend factor (larger is more accurate but slower)   
+	10 -- required number of returned neighbors (i.e. k of k-NN)   
+	0 -- searching methods (0~2, three kinds of algrothms, different performance on k-NN graph of different k)   
   
 See our paper or user manual for more details about the parameters and interfaces.
 

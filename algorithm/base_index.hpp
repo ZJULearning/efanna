@@ -142,13 +142,14 @@ namespace efanna{
        out.close();
     }
 SearchParams SP;
-    void setSearchParams(int epochs, int init_num, int extend_to,int search_trees, int search_lv){
+    void setSearchParams(int epochs, int init_num, int extend_to,int search_trees, int search_lv, int search_method){
       SP.search_epoches = epochs;
       SP.search_init_num = init_num;
       if(extend_to>init_num) SP.extend_to = init_num;
       else  SP.extend_to = extend_to;
       SP.search_depth = search_lv;
       SP.tree_num = search_trees;
+      SP.search_method = search_method;
     }
 
 
@@ -437,9 +438,9 @@ SearchParams SP;
         f = clock();
         std::cout << "iteration "<< iter << " time: "<< (f-s)*1.0/CLOCKS_PER_SEC<<" seconds"<< std::endl;
       }
-	calculate_norm();
-      //std::cout << nhoods.size() << std::endl;
-      knn_graph.clear();
+      //calculate_norm();
+std::cout << "saving graph" << std::endl;
+  /*    knn_graph.clear();
 	
       for(size_t i = 0; i < nhoods.size(); i++){
         CandidateHeap can;
@@ -456,12 +457,17 @@ SearchParams SP;
         }
         knn_graph.push_back(can);
       }
+*/
 	g.resize(nhoods.size());
 	M.resize(nhoods.size());
+	gs.resize(nhoods.size());
 	for(unsigned i = 0; i < nhoods.size();i++){
 	    M[i] = nhoods[i].Range;
 	    g[i].resize(nhoods[i].pool.size());
 	    std::copy(nhoods[i].pool.begin(), nhoods[i].pool.end(), g[i].begin());
+	    gs[i].resize(params_.K);
+	    for(unsigned j = 0; j < params_.K;j++)
+		gs[i][j] = g[i][j].id;
 	}
 		
     }
@@ -492,6 +498,7 @@ protected:
     const IndexParams params_;
     std::vector<std::vector<int> > knn_table_gt;
     std::vector<std::vector<Point> > g;
+    std::vector<std::vector<unsigned> > gs;
     std::vector<unsigned> M;
     //std::vector<std::vector<int>> knn_graph;
     std::vector<CandidateHeap> knn_graph;
@@ -514,6 +521,7 @@ protected:
     using InitIndex<DataType>::nnExpansion;\
     using InitIndex<DataType>::nnExpansion_kgraph;\
     using InitIndex<DataType>::g;\
+    using InitIndex<DataType>::gs;\
     using InitIndex<DataType>::M;\
     using InitIndex<DataType>::norms;
 

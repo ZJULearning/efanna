@@ -53,8 +53,8 @@ namespace efanna{
       void saveResults(char* filename){
         initIndex_->saveResults(filename);
       }
-      void setSearchParams(int epochs, int init_num, int extend_to, int search_trees = 0, int search_lv=-1){
-        initIndex_->setSearchParams(epochs, init_num, extend_to,search_trees, search_lv);
+      void setSearchParams(int epochs, int init_num, int extend_to, int search_trees = 0, int search_lv=-1, int search_method = 0){
+        initIndex_->setSearchParams(epochs, init_num, extend_to,search_trees, search_lv, search_method);
       }
       size_t getGraphSize(){
 	return initIndex_->getGraphSize();

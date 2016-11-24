@@ -38,6 +38,7 @@ namespace efanna {
   struct SearchParams{
     int search_init_num;
     int search_epoches;
+    int search_method;
     unsigned extend_to;
     unsigned tree_num;
     unsigned search_depth;

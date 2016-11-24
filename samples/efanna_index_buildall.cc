@@ -3,7 +3,6 @@
 #include <fstream>
 #include <ctime>
 #include <malloc.h>
-#include <boost/timer/timer.hpp>
 
 using namespace efanna;
 using namespace std;
@@ -28,7 +27,7 @@ if(dim!=cols)cout<<"data align to dimension "<<cols<<" for sse2 inst"<<endl;
   in.close();
 }
 int main(int argc, char** argv){
-  if(argc!=10){cout<< argv[0] << " data_file save_graph_file trees level epoch L K kNN S" <<endl; exit(-1);}
+  if(argc!=11){cout<< argv[0] << " data_file save_graph_file trees level epoch L K kNN S" <<endl; exit(-1);}
 
   float* data_load = NULL;
   //float* query_load = NULL;
@@ -41,20 +40,23 @@ int main(int argc, char** argv){
   Matrix<float> dataset(points_num,dim,data_load);
   //Matrix<float> query(q_num,qdim,query_load);
 
-  unsigned int trees = atoi(argv[3]);
-  int mlevel = atoi(argv[4]);
-  unsigned int epochs = atoi(argv[5]);
-  int L = atoi(argv[6]);
-  int checkK = atoi(argv[7]);
-  int kNN = atoi(argv[8]);
-  int S = atoi(argv[9]);
+  unsigned int trees = atoi(argv[4]);
+  int mlevel = atoi(argv[5]);
+  unsigned int epochs = atoi(argv[6]);
+  int L = atoi(argv[7]);
+  int checkK = atoi(argv[8]);
+  int kNN = atoi(argv[9]);
+  int S = atoi(argv[10]);
   
   //srand(time(NULL));
   FIndex<float> index(dataset, new L2DistanceAVX<float>(), efanna::KDTreeUbIndexParams(true, trees ,mlevel ,epochs,checkK,L, kNN, trees, S));
-boost::timer::auto_cpu_timer timer;
-  
+  clock_t s,f;
+  s = clock();
   index.buildIndex();
-cout<<timer.elapsed().wall / 1e9<<endl;
+
+  f = clock();
+  cout<<"Index building time : "<<(f-s)*1.0/CLOCKS_PER_SEC<<" seconds"<<endl;
   index.saveGraph(argv[2]);
+  index.saveTrees(argv[3]);
   return 0;
 }
