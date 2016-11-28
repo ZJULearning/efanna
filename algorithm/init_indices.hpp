@@ -1,11 +1,7 @@
 #ifndef EFANNA_INIT_INDICES_H_
 #define EFANNA_INIT_INDICES_H_
 #include "base_index.hpp"
-#include "random_index.hpp"
 #include "kdtreeub_index.hpp"
-#include "ieh_index.hpp"
-#include "nnexp_index.hpp"
-#include "dci_index.hpp"
 namespace efanna{
 
 
@@ -23,19 +19,19 @@ namespace efanna{
       InitIndex<DataType>* initIndex = NULL;
       switch(index_type){
         case RANDOM:
-        initIndex = create_index_<RandomIndex, DataType>(dataset, params, d);
+            initIndex = create_index_<KDTreeUbIndex, DataType>(dataset, params, d);
         break;
         case KDTREE_UB:
         initIndex = create_index_<KDTreeUbIndex, DataType>(dataset, params, d);
         break;
         case IEH:
-        initIndex = create_index_<IEHIndex, DataType>(dataset, params, d);
+            initIndex = create_index_<KDTreeUbIndex, DataType>(dataset, params, d);
         break;
         case NNEXP:
-        initIndex = create_index_<NNexpIndex, DataType>(dataset, params, d);
+            initIndex = create_index_<KDTreeUbIndex, DataType>(dataset, params, d);
         break;
         case DCI:
-        initIndex = create_index_<DciIndex, DataType>(dataset, params, d);
+            initIndex = create_index_<KDTreeUbIndex, DataType>(dataset, params, d);
         break;
 
       }
