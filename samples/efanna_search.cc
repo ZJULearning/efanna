@@ -29,7 +29,7 @@ if(dim!=cols)cout<<"data align to dimension "<<cols<<" for sse2 inst"<<endl;
   in.close();
 }
 int main(int argc, char** argv){
-  if(argc!=13 && argc!=12){cout<< argv[0] << " data_file tree_index graph_index query_file result_file tree lv epoch initsz extend querNN (search_method optional)" <<endl; exit(-1);}
+  if(argc!=11 && argc!=12){cout<< argv[0] << " data_file tree_index graph_index query_file result_file tree epoch initsz extend querNN search_method(optional)" <<endl; exit(-1);}
 
   float* data_load = NULL;
   float* query_load = NULL;
@@ -47,18 +47,17 @@ int main(int argc, char** argv){
   index.loadGraph(argv[3]);
 
   int search_trees = atoi(argv[6]);
-  int search_lv = atoi(argv[7]);
-  int search_epoc = atoi(argv[8]);
-  int poolsz = atoi(argv[9]);
-  int search_extend = atoi(argv[10]);
-  int search_method = argc == 13 ? atoi(argv[12]) : 0;
-  index.setSearchParams(search_epoc, poolsz, search_extend, search_trees,search_lv, search_method);
+  int search_epoc = atoi(argv[7]);
+  int poolsz = atoi(argv[8]);
+  int search_extend = atoi(argv[9]);
+  int search_method = argc == 12 ? atoi(argv[11]) : 0;
+  index.setSearchParams(search_epoc, poolsz, search_extend, search_trees, search_method);
 
   
 //clock_t s,f;
 boost::timer::auto_cpu_timer timer;
 //s=clock();
-  index.knnSearch(atoi(argv[11])/*query nn*/,query);
+  index.knnSearch(atoi(argv[10])/*query nn*/,query);
 //f=clock();
   
 //cout<<(f-s)*1.0/CLOCKS_PER_SEC/8<<endl;
