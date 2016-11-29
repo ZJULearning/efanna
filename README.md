@@ -1,4 +1,4 @@
-EFANNA: an Extreme Fast Approximate Nearest Neighbor search Algorithm framework based on kNN graph
+EFANNA: an Extremely Fast Approximate Nearest Neighbor search Algorithm framework based on kNN graph
 ============
 EFANNA is a ***flexible*** and ***efficient*** library for approximate nearest neighbor search (ANN search) on large scale data. It implements the algorithms of our paper [EFANNA : Extremely Fast Approximate Nearest Neighbor Search Algorithm Based on kNN Graph](http://arxiv.org/abs/1609.07228).    
 EFANNA provides fast solutions on ***approximate nearest neighbor graph construction*** and ***ANN search*** based on the prebuilt graph. And it achieves best performance on million scale data.   
