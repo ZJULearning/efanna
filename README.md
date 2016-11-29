@@ -108,7 +108,7 @@ You may build the kNN graph seperately for other use, like other graph based mac
 * ANN search
 
 		cd efanna/samples/
-		./sample/efanna_search sift_base.fvecs sift.trees sift.graph sift_query.fvecs sift.results 16 6 4 1200 200 10 0
+		./sample/efanna_search sift_base.fvecs sift.trees sift.graph sift_query.fvecs sift.results 16 4 1200 200 10 0
   
   Meaning of the parameters(from left to right):   
   
