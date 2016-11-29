@@ -118,12 +118,11 @@ Meaning of the parameters(from left to right)
 	sift\_query -- sift query points  
 	sift.results -- path to save ANN search results of given query   
 	16 -- number of trees to use (no greater than the number of prebuilt trees)   
-	6 -- search-up-depth (depth of leaf node is 1, larger is more accurate but slower)   
 	4 -- number of epoches   
-	1200 -- pool size factor (larger is more accurate but slower)   
+	1200 -- pool size factor (larger is more accurate but slower, usually 6~10 times larger than extend factor)   
 	200 -- extend factor (larger is more accurate but slower)   
 	10 -- required number of returned neighbors (i.e. k of k-NN)   
-	0 -- searching methods (0~2, three kinds of algrothms, different performance on k-NN graph of different k)   
+	0 -- searching methods (0~2, three kinds of algrothms, different performance on k-NN graph of different k, see user manual for parameter setting of other algorithms)   
   
 See our paper or user manual for more details about the parameters and interfaces.
 
