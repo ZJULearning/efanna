@@ -1,4 +1,4 @@
-EFANNA:an Extreme Fast Approximate Nearest Neighbor search Algorithm framework based on kNN graph
+EFANNA: an Extreme Fast Approximate Nearest Neighbor search Algorithm framework based on kNN graph
 ============
 EFANNA is a ***flexible*** and ***efficient*** library for approximate nearest neighbor search (ANN search) on large scale data. It implements the algorithms of our paper [EFANNA : Extremely Fast Approximate Nearest Neighbor Search Algorithm Based on kNN Graph](http://arxiv.org/abs/1609.07228).    
 EFANNA provides fast solutions on ***approximate nearest neighbor graph construction*** and ***ANN search*** based on the prebuilt graph. And it achieves best performance on million scale data.   
@@ -56,11 +56,11 @@ EFANNA uses a composite index to carry out ANN search, which includes an approxi
 You may build the kNN graph seperately for other use, like other graph based machine learning algorithms.  
  
  Below are some demos.   
+
 * kNN graph building :    
 
 		cd efanna/samples/   
-		./efanna_index_buildgraph sift_base.fvecs sift.graph 8 8 7 30 25 10 10   
-		  
+		./efanna_index_buildgraph sift_base.fvecs sift.graph 8 8 8 30 25 10 10   
 		  
  Meaning of the parameters(from left to right):    
 
@@ -73,8 +73,9 @@ You may build the kNN graph seperately for other use, like other graph based mac
 	 
 	30 -- L (larger is more accurate but slower, no smaller than K)  
 	25 -- check (larger is more accurate but slower, no smaller than K)  
-	10 -- K, number of neighbors for each point    
+	10 -- K, for KNN graph   
 	10 -- S (larger is more accurate but slower)
+
 	
 * tree building :   
     
@@ -86,6 +87,8 @@ You may build the kNN graph seperately for other use, like other graph based mac
 	sift\_base.fvecs -- database points  
 	sift.trees -- struncated KD-trees built by EFANNA  
 	32 -- number of trees to build   
+
+
 * index building at one time:   
 
 		cd efanna/samples/
@@ -99,11 +102,12 @@ You may build the kNN graph seperately for other use, like other graph based mac
 	32 -- number of trees in total for building index   
 	8 -- conquer-to-depth    
 	8 -- iteration number    
-	100 -- L   
-	100 -- check    
-	100 -- K    
-	10 -- S   
+	200 -- L (larger is more accurate but slower, no smaller than K)   
+	200 -- check (larger is more accurate but slower, no smaller than K)    
+	100 -- K, for KNN graph
+	10 -- S (larger is more accurate but slower)  
 	8 -- 8 out of 32 trees are used for building graph
+
    
 * ANN search
 
