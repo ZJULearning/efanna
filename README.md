@@ -91,7 +91,7 @@ You may build the kNN graph seperately for other use, like other graph based mac
 		cd efanna/samples/
 		./efanna_index_buildall sift_base.fvecs sift.trees sift.graph 32 8 8 200 200 100 10 8
    
-Meaning of the parameters(from left to right)   
+  Meaning of the parameters(from left to right)   
 	
 	sift\_base.fvecs -- database points  
 	sift.trees -- struncated KD-trees built by EFANNA  
