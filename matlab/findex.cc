@@ -68,7 +68,7 @@ void _construct(int out_n, mxArray* out_array[], int in_n, const mxArray *in_arr
     }
 
     std::map<std::string, Distance<T>* > dist_table = {
-        {"l2", new L2Distance<T>() }
+        {"l2", new L2DistanceAVX<T>() }
     };
     std::map<std::string, typename construct_func<T>::entry> index_table = {
         {"kdtreeub", &_construct_kdtreeub<T> },
