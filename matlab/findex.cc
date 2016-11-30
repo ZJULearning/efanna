@@ -54,6 +54,7 @@ FIndex<T>* _construct_kdtreeub(Matrix<T> dataset, Distance<T>* dist, int in_n, c
         mexPrintf("kdtreeub params : %d %d %d %d %d %d %d %d\n", trees, mlevel, epoches, L, check_k, K, S, build_trees);
         return new FIndex<T>(dataset, dist, KDTreeUbIndexParams(rnn_used, trees, mlevel, epoches, check_k, L, K, build_trees, S));
     }   
+    return NULL; // ERROR if this line is reached
 }
 
 template<typename T>
@@ -131,7 +132,7 @@ void _get_graph_mat(int out_n, mxArray* out_array[], int in_n, const mxArray *in
     size_t nrows = handle->getGraphSize();
     std::map<unsigned, std::vector<unsigned>*> col_graph;
     int maxnnz = 0;
-    for (int i = 0; i < nrows; i++) {
+    for (unsigned i = 0; i < nrows; i++) {
         std::vector<unsigned> nodes = handle->getGraphRow(i);
         maxnnz += nodes.size();
         for (unsigned x : nodes) {
@@ -149,7 +150,7 @@ void _get_graph_mat(int out_n, mxArray* out_array[], int in_n, const mxArray *in
     int nfilled = -1;
     int njc = 0;
     jc[0] = 0;
-    for (int i = 0; i < nrows; i++) {
+    for (unsigned i = 0; i < nrows; i++) {
         if (col_graph.find(i) == col_graph.end()) {
             njc ++;
             jc[njc] = jc[njc-1];
@@ -262,11 +263,11 @@ void _save_trees(int out_n, mxArray* out_array[], int in_n, const mxArray *in_ar
 template<typename T>
 void _set_search_params_kdtreeub(FIndex<T>* handle, int in_n, const mxArray *in_array[]) {
     int search_trees = (int)(*mxGetPr(in_array[0]));
-    int search_lv = (int)(*mxGetPr(in_array[1]));
-    int search_epoc = (int)(*mxGetPr(in_array[2]));
-    int search_extend = (int)(*mxGetPr(in_array[3]));
-    int poolsz = (int)(*mxGetPr(in_array[4]));
-    handle->setSearchParams(search_epoc, poolsz, search_extend, search_trees,search_lv);
+    int search_epoc = (int)(*mxGetPr(in_array[1]));
+    int search_extend = (int)(*mxGetPr(in_array[2]));
+    int poolsz = (int)(*mxGetPr(in_array[3]));
+    int search_method = (int)(*mxGetPr(in_array[4]));
+    handle->setSearchParams(search_epoc, poolsz, search_extend, search_trees, search_method);
 }
 
 template<typename T>
