@@ -35,6 +35,6 @@ Common errors and their solutions:
     * It may indicates you are using very old version of matlab and not fitting your g++ version well.
 
 * If error related to ``{mablab root}/sys/os/glnxa64/libstdc++.so.6`` occurs in runtime (typically, ``version 'CXXABI_1.x.x' not found (required by ...)``, or `` version `GLIBCXX_3.x.x' not found (required by ...)``
-    * Try ``export LD_PRELOAD=$LD_PRELOAD:/usr/lib/x86_64-linux-gnu/libstdc++.so.6``, or ``export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu/libstdc++.so.6``. You may need to rewrite the command with your own path of ``libstdc++.so.6`` according to the place you setup your gcc compiler's lib.
+    * Try ``export LD_PRELOAD=$LD_PRELOAD:/usr/lib/x86_64-linux-gnu/libstdc++.so.6``. You may need to rewrite the command with your own path of ``libstdc++.so.6`` according to the place you setup your gcc compiler's lib.
     * OR, directly substitute ``/usr/local/MATLAB/{your version}/sys/os/glnx64/libstdc++.so.6`` with your compiler's ``libstdc++.so.6``. You may need to rewrite the command with the place you setup your matlab.
     * It indicates your mex compiler automatically links the g++ lib under your matlab directory, which is not compatible with your g++ compiler, during the compilation step. 
