@@ -483,15 +483,16 @@ std::cout << "saving graph" << std::endl;
     }
 typedef std::set<Candidate<DataType>, std::greater<Candidate<DataType>> > CandidateHeap;
 typedef std::vector<unsigned int> IndexVec;
-    size_t getGraphSize(){return knn_graph.size();}
-    std::vector<unsigned> getGraphRow(unsigned row_id){
-	std::vector<unsigned> row;
-	if(knn_graph.size() > row_id){
-	    typename CandidateHeap::reverse_iterator it = knn_graph[row_id].rbegin();
-	    for(; it != knn_graph[row_id].rend(); it++)row.push_back(it->row_id);
+	size_t getGraphSize(){return gs.size();}
+	std::vector<unsigned> getGraphRow(unsigned row_id){
+		std::vector<unsigned> row;
+		if(gs.size() > row_id){
+			for(unsigned i = 0; i < gs[row_id].size(); i++)row.push_back(gs[row_id][i]);
+		}
+		return row;
 	}
-	return row;
-    }
+
+
 protected:
     const Matrix<DataType> features_;
     const Distance<DataType>* distance_;
