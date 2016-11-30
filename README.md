@@ -1,5 +1,5 @@
 EFANNA: an Extremely Fast Approximate Nearest Neighbor search Algorithm framework based on kNN graph
-===========
+============
 EFANNA is a ***flexible*** and ***efficient*** library for approximate nearest neighbor search (ANN search) on large scale data. It implements the algorithms of our paper [EFANNA : Extremely Fast Approximate Nearest Neighbor Search Algorithm Based on kNN Graph](http://arxiv.org/abs/1609.07228).    
 EFANNA provides fast solutions on ***approximate nearest neighbor graph construction*** and ***ANN search*** based on the prebuilt graph. And it achieves best performance on million scale data.   
 EFANNA is also flexible to adopt all kinds of hierarchical structure for initialization, such as random projection tree, hierarchical clustering tree, multi-table hashing and so on.   
@@ -64,7 +64,7 @@ You may build the kNN graph seperately for other use, like other graph based mac
 		  
  Meaning of the parameters(from left to right):    
 
-	sift\_base.fvecs -- database points  
+	sift_base.fvecs -- database points  
 	sift.graph -- graph built by EFANNA   
 	
 	8 -- number of trees used to build the graph (larger is more accurate but slower)   
@@ -84,7 +84,7 @@ You may build the kNN graph seperately for other use, like other graph based mac
         
   Meaning of the parameters(from left to right):   
   
-	sift\_base.fvecs -- database points  
+	sift_base.fvecs -- database points  
 	sift.trees -- struncated KD-trees built by EFANNA  
 	32 -- number of trees to build   
 
@@ -96,7 +96,7 @@ You may build the kNN graph seperately for other use, like other graph based mac
    
   Meaning of the parameters(from left to right)   
 	
-	sift\_base.fvecs -- database points  
+	sift_base.fvecs -- database points  
 	sift.trees -- struncated KD-trees built by EFANNA  
 	sift.graph --
 	32 -- number of trees in total for building index   
@@ -112,14 +112,14 @@ You may build the kNN graph seperately for other use, like other graph based mac
 * ANN search
 
 		cd efanna/samples/
-		./sample/efanna_search sift_base.fvecs sift.trees sift.graph sift_query.fvecs sift.results 16 4 1200 200 10 0
+		./efanna_search sift_base.fvecs sift.trees sift.graph sift_query.fvecs sift.results 16 4 1200 200 10 0
   
   Meaning of the parameters(from left to right):   
   
-	sift\_base.fvecs -- database points  
+	sift_base.fvecs -- database points  
 	sift.trees -- prebuilt struncated KD-trees used for search  
 	sift.graph -- prebuilt kNN graph   
-	sift\_query -- sift query points  
+	sift_query -- sift query points  
 	sift.results -- path to save ANN search results of given query   
 	16 -- number of trees to use (no greater than the number of prebuilt trees)   
 	4 -- number of epoches   
@@ -127,7 +127,20 @@ You may build the kNN graph seperately for other use, like other graph based mac
 	200 -- extend factor (larger is more accurate but slower)   
 	10 -- required number of returned neighbors (i.e. k of k-NN)   
 	0 -- searching methods (0~2, three kinds of algrothms, different performance on k-NN graph of different k, see user manual for parameter setting of other algorithms)   
+ 
+ 
+* Evaluation
+
+		cd efanna/samples/
+		./evaluate sift.results sift_groundtruth.ivecs 10
+
+  Meaning of the parameters(from left to right):   
   
+	sift.results -- search results file  
+	sift_groundtruth.ivecs -- ground truth file  
+	10 -- evaluate the 10NN accuracy (the only first 10 points returned by the algorithm are examined, how many points are among the true 10 nearest neighbors of the query)   
+
+
 See our paper or user manual for more details about the parameters and interfaces.
 
 Output format
