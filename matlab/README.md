@@ -1,6 +1,6 @@
 **Compilation**
 
-1. Compile with: ``mex CXXFLAGS="\$CXXFLAGS -std=c++11 -fopenmp -msse2 -msse4" LDFLAGS="\$LDFLAGS -fopenmp" findex.cc -I../ -largeArrayDims``
+1. Compile with: ``mex CXXFLAGS="\$CXXFLAGS -std=c++11 -O3 -march=native -fopenmp -Wall -lboost_timer -lboost_system" LDFLAGS="\$LDFLAGS -fopenmp" findex.cc -I../ -largeArrayDims``
 
 2. Run any matlab program with efanna! 
 

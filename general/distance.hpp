@@ -47,8 +47,8 @@ template<typename T>
 class Distance {
 public:
     virtual T compare(const T* a, const T* b, size_t length) const = 0;
-    virtual T norm(const T* a, size_t length) const;
-    virtual T dot(const T* a, const T* b, size_t length) const;
+    virtual T norm(const T* a, size_t length) const = 0;
+    virtual T dot(const T* a, const T* b, size_t length) const = 0;
     virtual ~Distance() {}
 };
 

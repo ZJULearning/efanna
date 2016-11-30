@@ -57,6 +57,7 @@ FIndex<T>* _construct_kdtreeub(Matrix<T> dataset, Distance<T>* dist, int in_n, c
     return NULL; // ERROR if this line is reached
 }
 
+/*
 template<typename T>
 FIndex<T>* _construct_nndescent(Matrix<T> dataset, Distance<T>* dist, int in_n, const mxArray *in_array[]){
     if (in_n!=4) {
@@ -80,6 +81,7 @@ FIndex<T>* _construct_nnexp(Matrix<T> dataset, Distance<T>* dist, int in_n, cons
     mexPrintf("nnexp params : %d %d\n", epoches, extend);
     return new FIndex<T>(dataset, dist, NNexpIndexParams(epoches, extend));
 }
+*/
 
 template<typename T>
 void _construct(int out_n, mxArray* out_array[], int in_n, const mxArray *in_array[]) {
@@ -91,13 +93,21 @@ void _construct(int out_n, mxArray* out_array[], int in_n, const mxArray *in_arr
     }
 
     std::map<std::string, Distance<T>* > dist_table = {
-        {"l2", new L2Distance<T>() }
+        {"l2", new L2DistanceAVX<T>() }
     };
+
+    std::map<std::string, typename construct_func<T>::entry> index_table = {
+        {"kdtreeub", &_construct_kdtreeub<T> },
+        {"nndescent", &_construct_kdtreeub<T> },
+        {"nnexp", &_construct_kdtreeub<T> }
+    };
+/*
     std::map<std::string, typename construct_func<T>::entry> index_table = {
         {"kdtreeub", &_construct_kdtreeub<T> },
         {"nndescent", &_construct_nndescent<T> },
         {"nnexp", &_construct_nnexp<T> }
     };
+*/
 
     std::string index_name = mxArrayToString(in_array[1]);
     if (index_table.find(index_name)==index_table.end()) {
