@@ -29,59 +29,34 @@ struct construct_func {
 //TODO: default params
 template<typename T>
 FIndex<T>* _construct_kdtreeub(Matrix<T> dataset, Distance<T>* dist, int in_n, const mxArray *in_array[]){
-    if (in_n!=8 && in_n!=9 && in_n!=2) {
+    if (in_n!=7 && in_n!=8 && in_n!=1) {
         mexErrMsgTxt("Incorrect number of input arguments");
     }
 
-    bool rnn_used = (bool)(*mxGetPr(in_array[0]));
-    int trees = (int)(*mxGetPr(in_array[1]));
-    if (in_n==2) {
+    bool rnn_used = true;
+    int trees = (int)(*mxGetPr(in_array[0]));
+    if (in_n==1) {
         mexPrintf("kdtreeub params : %d\n", trees);
         return new FIndex<T>(dataset, dist, KDTreeUbIndexParams(rnn_used, trees, 10, 10, 10, 10, 10, trees, 10));
     }
 
-    int mlevel = (int)(*mxGetPr(in_array[2]));
-    int epoches = (int)(*mxGetPr(in_array[3]));
-    int L = (int)(*mxGetPr(in_array[4]));
-    int check_k = (int)(*mxGetPr(in_array[5]));
-    int K = (int)(*mxGetPr(in_array[6]));
-    int S = (int)(*mxGetPr(in_array[7]));
-    if (in_n==8) {
+    int mlevel = (int)(*mxGetPr(in_array[1]));
+    int epoches = (int)(*mxGetPr(in_array[2]));
+    int L = (int)(*mxGetPr(in_array[3]));
+    int check_k = (int)(*mxGetPr(in_array[4]));
+    int K = (int)(*mxGetPr(in_array[5]));
+    int S = (int)(*mxGetPr(in_array[6]));
+    if (in_n==7) {
         mexPrintf("kdtreeub params : %d %d %d %d %d %d %d\n", trees, mlevel, epoches, L, check_k, K, S);
         return new FIndex<T>(dataset, dist, KDTreeUbIndexParams(rnn_used, trees, mlevel, epoches, check_k, L, K, trees, S));
-    } else if (in_n==9) {
-        int build_trees = (int)(*mxGetPr(in_array[8]));
+    } else if (in_n==8) {
+        int build_trees = (int)(*mxGetPr(in_array[7]));
         mexPrintf("kdtreeub params : %d %d %d %d %d %d %d %d\n", trees, mlevel, epoches, L, check_k, K, S, build_trees);
         return new FIndex<T>(dataset, dist, KDTreeUbIndexParams(rnn_used, trees, mlevel, epoches, check_k, L, K, build_trees, S));
     }   
     return NULL; // ERROR if this line is reached
 }
 
-/*
-template<typename T>
-FIndex<T>* _construct_nndescent(Matrix<T> dataset, Distance<T>* dist, int in_n, const mxArray *in_array[]){
-    if (in_n!=4) {
-        mexErrMsgTxt("Incorrect number of input arguments");
-    }
-    bool rnn_used = (bool)(*mxGetPr(in_array[0]));
-    int epoches = (int)(*mxGetPr(in_array[1]));
-    int K = (int)(*mxGetPr(in_array[2]));
-    int L = (int)(*mxGetPr(in_array[3]));
-    mexPrintf("nndescent params : %d %d %d %d\n", rnn_used, epoches, K, L);
-    return new FIndex<T>(dataset, dist, RandomIndexParams(rnn_used, epoches, K, L));
-}
-
-template<typename T>
-FIndex<T>* _construct_nnexp(Matrix<T> dataset, Distance<T>* dist, int in_n, const mxArray *in_array[]){
-    if (in_n!=2) {
-        mexErrMsgTxt("Incorrect number of input arguments");
-    }
-    int epoches = (int)(*mxGetPr(in_array[0]));
-    int extend = (int)(*mxGetPr(in_array[1]));
-    mexPrintf("nnexp params : %d %d\n", epoches, extend);
-    return new FIndex<T>(dataset, dist, NNexpIndexParams(epoches, extend));
-}
-*/
 
 template<typename T>
 void _construct(int out_n, mxArray* out_array[], int in_n, const mxArray *in_array[]) {
@@ -93,21 +68,13 @@ void _construct(int out_n, mxArray* out_array[], int in_n, const mxArray *in_arr
     }
 
     std::map<std::string, Distance<T>* > dist_table = {
-        {"l2", new L2DistanceAVX<T>() }
+        {"l2", new L2Distance<T>() }
     };
-
     std::map<std::string, typename construct_func<T>::entry> index_table = {
         {"kdtreeub", &_construct_kdtreeub<T> },
         {"nndescent", &_construct_kdtreeub<T> },
         {"nnexp", &_construct_kdtreeub<T> }
     };
-/*
-    std::map<std::string, typename construct_func<T>::entry> index_table = {
-        {"kdtreeub", &_construct_kdtreeub<T> },
-        {"nndescent", &_construct_nndescent<T> },
-        {"nnexp", &_construct_nnexp<T> }
-    };
-*/
 
     std::string index_name = mxArrayToString(in_array[1]);
     if (index_table.find(index_name)==index_table.end()) {
@@ -274,8 +241,8 @@ template<typename T>
 void _set_search_params_kdtreeub(FIndex<T>* handle, int in_n, const mxArray *in_array[]) {
     int search_trees = (int)(*mxGetPr(in_array[0]));
     int search_epoc = (int)(*mxGetPr(in_array[1]));
-    int search_extend = (int)(*mxGetPr(in_array[2]));
-    int poolsz = (int)(*mxGetPr(in_array[3]));
+    int poolsz = (int)(*mxGetPr(in_array[2]));
+    int search_extend = (int)(*mxGetPr(in_array[3]));
     int search_method = (int)(*mxGetPr(in_array[4]));
     handle->setSearchParams(search_epoc, poolsz, search_extend, search_trees, search_method);
 }

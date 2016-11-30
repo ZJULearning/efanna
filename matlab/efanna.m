@@ -5,9 +5,9 @@ classdef efanna < handle
     end
     methods
         % Constructor
-        function this = efanna(data, index_name, dist_name, varargin)
-            this.objectHandle = findex('new', data, index_name, dist_name, varargin{:});
-            this.index_name = index_name;
+        function this = efanna(data, varargin)
+            this.objectHandle = findex('new', data, 'kdtreeub', 'l2', varargin{:});
+            this.index_name = 'kdtreeub'
         end
         % Destructor
         function delete(this)
