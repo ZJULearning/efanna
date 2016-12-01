@@ -1,7 +1,7 @@
 EFANNA: an Extremely Fast Approximate Nearest Neighbor search Algorithm framework based on kNN graph
 ============
 EFANNA is a ***flexible*** and ***efficient*** library for approximate nearest neighbor search (ANN search) on large scale data. It implements the algorithms of our paper [EFANNA : Extremely Fast Approximate Nearest Neighbor Search Algorithm Based on kNN Graph](http://arxiv.org/abs/1609.07228).    
-EFANNA provides fast solutions on ***approximate nearest neighbor graph construction*** and ***ANN search*** based on the prebuilt graph. And it achieves best performance on million scale data.   
+EFANNA provides fast solutions on both ***approximate nearest neighbor graph construction*** and ***ANN search*** problems. And it achieves best performance on million scale data.   
 EFANNA is also flexible to adopt all kinds of hierarchical structure for initialization, such as random projection tree, hierarchical clustering tree, multi-table hashing and so on.   
 
 What's new
@@ -112,7 +112,7 @@ You may build the kNN graph seperately for other use, like other graph based mac
 * ANN search
 
 		cd efanna/samples/
-		./efanna_search sift_base.fvecs sift.trees sift.graph sift_query.fvecs sift.results 16 4 1200 200 10 0
+		./efanna_search sift_base.fvecs sift.trees sift.graph sift_query.fvecs sift.results 16 4 1200 200 10
   
   Meaning of the parameters(from left to right):   
   
@@ -126,7 +126,6 @@ You may build the kNN graph seperately for other use, like other graph based mac
 	1200 -- pool size factor (larger is more accurate but slower, usually 6~10 times larger than extend factor)   
 	200 -- extend factor (larger is more accurate but slower)   
 	10 -- required number of returned neighbors (i.e. k of k-NN)   
-	0 -- searching methods (0~2, three kinds of algrothms, different performance on k-NN graph of different k, see user manual for parameter setting of other algorithms)   
  
  
 * Evaluation
@@ -155,6 +154,43 @@ Input of EFANNA
 Because there is no unified format for input data, users may need to write input function to read your own data. You may imitate the input function in our sample code (sample/efanna\_efanna\_index\_buildgraph.cc) to load the data into our matrix.
 
 To use SIMD instruction optimization, you should pay attention to the data alignment problem of SSE / AVX instruction.  
+
+Compare with EFANNA without parallelism and SSE/AVX instructions
+------
+To disable the parallelism, there is no need to modify the code. Simply
+
+        export OMP_NUM_THREADS=1
+
+before you run the code. Then the code will only use one thread. This is a very convenient way to control the number of threads used.
+
+To disable SSE/AVX instructions, you need to modify samples/xxxx.cc, find the line
+
+        FIndex<float> index(dataset, new L2DistanceAVX<float>(), efanna::KDTreeUbIndexParams(true, trees ,mlevel ,epochs,checkK,L, kNN, trees, S));
+
+Change **L2DistanceAVX** to **L2Distance** and build the project. Now the SSE/AVX instructions are disabled.
+If you want to try SSE instead of AVX, try **L2DistanceSSE**
+
+Parameters to get the Fig. 4/5 (10-NN approximate graph construction) in our paper 
+------
+SIFT1M:
+
+        ./efanna_index_buildgraph sift_base.fvecs sift.graph 8 8 0 20 10 10 10
+        ./efanna_index_buildgraph sift_base.fvecs sift.graph 8 8 1 20 10 10 10
+        ./efanna_index_buildgraph sift_base.fvecs sift.graph 8 8 2 20 10 10 10
+        ./efanna_index_buildgraph sift_base.fvecs sift.graph 8 8 3 20 10 10 10
+        ./efanna_index_buildgraph sift_base.fvecs sift.graph 8 8 5 20 10 10 10
+        ./efanna_index_buildgraph sift_base.fvecs sift.graph 8 8 6 20 20 10 10
+        ./efanna_index_buildgraph sift_base.fvecs sift.graph 8 8 6 20 30 10 10
+
+GIST1M:
+
+        ./efanna_index_buildgraph gist_base.fvecs gist.graph 8 8 2 30 30 10 10
+        ./efanna_index_buildgraph gist_base.fvecs gist.graph 8 8 3 30 30 10 10
+        ./efanna_index_buildgraph gist_base.fvecs gist.graph 8 8 4 30 30 10 10
+        ./efanna_index_buildgraph gist_base.fvecs gist.graph 8 8 5 30 30 10 10
+        ./efanna_index_buildgraph gist_base.fvecs gist.graph 8 8 6 30 30 10 10
+        ./efanna_index_buildgraph gist_base.fvecs gist.graph 8 8 7 30 30 10 10
+        ./efanna_index_buildgraph gist_base.fvecs gist.graph 8 8 10 30 40 10 10
 
 Acknowledgment
 ------
