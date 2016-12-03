@@ -46,43 +46,64 @@ public:
 		ExtraParamsMap::const_iterator it = params_.extra_params.find("trees");
 		if(it != params_.extra_params.end()){
 			TreeNum = (it->second).int_val;
+#ifdef INFO
 			std::cout << "Using kdtree to build "<< TreeNum << " trees in total" << std::endl;
+#endif
 		}
 		else{
 			TreeNum = 4;
+#ifdef INFO
 			std::cout << "Using kdtree to build "<< TreeNum << " trees in total" << std::endl;
+#endif
 		}
 		SP.tree_num = TreeNum;
 
 		it = params_.extra_params.find("treesb");
 		if(it != params_.extra_params.end()){
 			TreeNumBuild = (it->second).int_val;
+#ifdef INFO
 			std::cout << "Building kdtree graph with "<< TreeNumBuild <<" trees"<< std::endl;
+#endif
 		}
 		else{
 			TreeNumBuild = TreeNum;
+#ifdef INFO
 			std::cout << "Building kdtree graph with "<< TreeNumBuild <<" trees"<< std::endl;
+#endif
 		}
 
 		it = params_.extra_params.find("ml");
 		if(it != params_.extra_params.end()){
 			ml = (it->second).int_val;
+#ifdef INFO
 			std::cout << "Building kdtree initial index with merge level "<< ml  << std::endl;
+#endif
 		}
 		else{
 			ml = -1;
+#ifdef INFO
 			std::cout << "Building kdtree initial index with max merge level "<< std::endl;
+#endif
 		}
 		max_deepth = 0x0fffffff;
 		error_flag = false;
 	}
 
 	void buildIndexImpl(){
+#ifdef INFO
 		clock_t s,f;
 		s = clock();
+#endif
 		initGraph();
+
+#ifdef INFO
 		f = clock();
+#endif
+
+		std::cout << "initial graph finised"<< std::endl;
+#ifdef INFO
 		std::cout << "initial graph using time: "<< (f-s)*1.0/CLOCKS_PER_SEC<<" seconds"<< std::endl;
+#endif
 
 		if(error_flag){
 			std::cout << "merge level deeper than tree, max merge deepth is" << max_deepth-1<<std::endl;
@@ -219,7 +240,6 @@ public:
 		}
 		out.close();
 	}
-
 	void loadGraph(char* filename){
 		std::ifstream in(filename,std::ios::binary);
 		unsigned N;
@@ -255,7 +275,23 @@ public:
 		}
 		in.close();
 	}
+	/*
+    void saveGraph(char* filename){
+     std::ofstream out(filename,std::ios::binary);
 
+     int dim = params_.K;//int meansize = 0;
+     for(size_t i = 0; i < knn_graph.size(); i++){
+       typename CandidateHeap::reverse_iterator it = knn_graph[i].rbegin();
+       out.write((char*)&dim, sizeof(int));//meansize += knn_graph[i].size();
+       for(size_t j =0; j < params_.K && it!= knn_graph[i].rend(); j++,it++ ){
+         int id = it->row_id;
+         out.write((char*)&id, sizeof(int));
+       }
+     }//meansize /= knn_graph.size();
+     //std::cout << "size mean " << meansize << std::endl;
+     out.close();
+    }
+	 */
 	void saveGraph(char* filename){
 		std::ofstream out(filename,std::ios::binary);
 		unsigned N = gs.size();
@@ -325,7 +361,9 @@ public:
 	}
 
 	void getNeighbors_nnexp(size_t K, const Matrix<DataType>& query){
+#ifdef INFO
 		std::cout<<"using tree num "<< SP.tree_num<<std::endl;
+#endif
 		if(SP.tree_num > tree_roots_.size()){
 			std::cout<<"wrong tree number"<<std::endl;return;
 		}
@@ -456,7 +494,9 @@ public:
 	}
 
 	void getNeighbors_kgraph(size_t searchK, const Matrix<DataType>& query){
+#ifdef INFO
 		std::cout<<"using tree num "<< SP.tree_num<<std::endl;
+#endif
 		if(SP.tree_num > tree_roots_.size()){
 			std::cout<<"wrong tree number"<<std::endl;return;
 		}
@@ -1380,8 +1420,9 @@ protected:
 			}
 		}
 		knn_graph.clear();
+#ifdef INFO
 		std::cout<<"initial completed"<<std::endl;
-
+#endif
 	}
 
 };
