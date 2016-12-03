@@ -6,9 +6,9 @@ EFANNA is also flexible to adopt all kinds of hierarchical structure for initial
 
 What's new
 -------
-Interfaces change.    
-AVX instructions supported.    
-algorithm improved.    
++ <font color="red" >The [paper](http://arxiv.org/abs/1609.07228) updated significantly. </font>   Dec 6, 2016
++ <font color="red" >Algorithm improved and AVX instructions supported.</font>  Nov 30, 2016   
++ <font color="red" >Parallelism with OpenMP.</font>  Sep 26, 2016  
 
 Benchmark data set
 -------
