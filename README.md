@@ -92,13 +92,13 @@ You may build the kNN graph seperately for other use, like other graph based mac
 * index building at one time:   
 
 		cd efanna/samples/
-		./efanna_index_buildall sift_base.fvecs sift.trees sift.graph 32 8 8 200 200 100 10 8
+		./efanna_index_buildall sift_base.fvecs sift.graph sift.trees 32 8 8 200 200 100 10 8
    
   Meaning of the parameters(from left to right)   
 	
 	sift_base.fvecs -- database points  
 	sift.trees -- struncated KD-trees built by EFANNA  
-	sift.graph --
+	sift.graph -- approximate KNN graph built by EFANNA
 	32 -- number of trees in total for building index   
 	8 -- conquer-to-depth    
 	8 -- iteration number    
