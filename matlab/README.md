@@ -19,7 +19,9 @@
 
 * For instance, use ``matlab -nodesktop -nosplash -r "run('./samples/example_buildgraph')"`` to try. (Don't forget to provide inputs! Default inputs are placed under ``~/data/sift/``. You may change this path in the \*.m programs)
 
-* Every sample does the same job as C++ programs under ``../samples/`` do
+* Every sample does the same job as C++ programs under ``../samples/`` do, and their parameters are mostly identical.
+
+* Additionaly, a *row-wise* organized sparse matrix describing nearest neighbours for all points is returned from functions for building or loading graphs
 
 * Look inside samples for more API details. 
 
