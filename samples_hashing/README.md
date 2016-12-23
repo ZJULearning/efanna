@@ -52,7 +52,7 @@ You need a hash index for search. Please use the [matlab codes](https://github.c
 	32 -- code length of the hash table   
 	8  -- maximum radius (the algorithm will stop locate points beyond this radius number, using random points from the database to fill the initial pool)   
 	0  -- code length shift (the algorithm will actually use codelength - codelengthshift bits code, in this case, 32-0=32)   
-	10000 -- initial pool size factor
+	10000 -- initial pool size factor    
 	100 -- required number of returned neighbors (i.e. k of k-NN)   
 
 To use Iterative Expanding Hashing (IEH), you need a kNN graph besides hash index. You can use [EFANNA](https://github.com/fc731097343/efanna) to build an approximate kNN graph efficiently.
@@ -73,7 +73,7 @@ To use Iterative Expanding Hashing (IEH), you need a kNN graph besides hash inde
 	32 -- code length of the hash table   
 	8  -- maximum radius (the algorithm will stop locate points beyond this radius number, using random points from the database to fill the initial pool)   
 	0  -- code length shift (the algorithm will actually use codelength - codelengthshift bits code, in this case, 32-0=32)   
-    200 -- initial pool size factor
+  200 -- initial pool size factor    
 	100 -- required number of returned neighbors (i.e. k of k-NN)   
 	sift.graph -- prebuilt kNN graph   
 	6 -- number of epoches   
