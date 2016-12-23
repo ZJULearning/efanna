@@ -1274,6 +1274,8 @@ protected:
 			DFSbuild(node, rng, &myids[0]+node->StartIdx, node->EndIdx-node->StartIdx, node->StartIdx);
 		}
 	}
+    void outputVisitBucketNum(){}
+
 	void initGraph(){
 		//initial
 		unsigned N = features_.get_rows();

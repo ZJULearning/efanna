@@ -6,7 +6,7 @@ LDFLAGS=$(OPTM) -Wall -lboost_timer -lboost_system
 
 INCLUDES=-I./ -I./algorithm -I./general
 
-SAMPLES=$(patsubst %.cc, %, $(wildcard samples/*.cc))
+SAMPLES=$(patsubst %.cc, %, $(wildcard samples/*.cc samples_hashing/*.cc))
 SAMPLE_OBJS=$(foreach sample, $(SAMPLES), $(sample).o)
 
 HEADERS=$(wildcard ./*.hpp ./*/*.hpp)

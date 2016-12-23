@@ -2,6 +2,7 @@
 #define EFANNA_INIT_INDICES_H_
 #include "base_index.hpp"
 #include "kdtreeub_index.hpp"
+#include "hashing_index.hpp"
 namespace efanna{
 
 
@@ -18,22 +19,12 @@ namespace efanna{
   {
       InitIndex<DataType>* initIndex = NULL;
       switch(index_type){
-        case RANDOM:
-            initIndex = create_index_<KDTreeUbIndex, DataType>(dataset, params, d);
-        break;
         case KDTREE_UB:
         initIndex = create_index_<KDTreeUbIndex, DataType>(dataset, params, d);
         break;
-        case IEH:
-            initIndex = create_index_<KDTreeUbIndex, DataType>(dataset, params, d);
+        case HASHING:
+        initIndex = create_index_<HASHINGIndex, DataType>(dataset, params, d);
         break;
-        case NNEXP:
-            initIndex = create_index_<KDTreeUbIndex, DataType>(dataset, params, d);
-        break;
-        case DCI:
-            initIndex = create_index_<KDTreeUbIndex, DataType>(dataset, params, d);
-        break;
-
       }
       return initIndex;
   }

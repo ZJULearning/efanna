@@ -5,11 +5,8 @@
 
 namespace efanna {
   enum init_algorithm {
-      RANDOM,
       KDTREE_UB,
-      IEH,
-      NNEXP,
-      DCI
+	  HASHING
   };
 
   union ValueType{

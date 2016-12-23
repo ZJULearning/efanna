@@ -125,6 +125,8 @@ namespace efanna{
     virtual void saveTrees(char* filename) = 0;
     virtual void loadGraph(char* filename) = 0;
     virtual void saveGraph(char* filename) = 0;
+	virtual void outputVisitBucketNum() = 0;
+
     void saveResults(char* filename){
        std::ofstream out(filename,std::ios::binary);
        std::vector<std::vector<int>>::iterator i;

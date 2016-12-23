@@ -2,7 +2,7 @@ EFANNA: an Extremely Fast Approximate Nearest Neighbor search Algorithm framewor
 ============
 EFANNA is a ***flexible*** and ***efficient*** library for approximate nearest neighbor search (ANN search) on large scale data. It implements the algorithms of our paper [EFANNA : Extremely Fast Approximate Nearest Neighbor Search Algorithm Based on kNN Graph](http://arxiv.org/abs/1609.07228).    
 EFANNA provides fast solutions on both ***approximate nearest neighbor graph construction*** and ***ANN search*** problems. 
-EFANNA is also flexible to adopt all kinds of hierarchical structure for initialization, such as random projection tree, hierarchical clustering tree, multi-table hashing and so on.   
+EFANNA is also flexible to adopt all kinds of hierarchical structure for initialization, such as random projection tree, hierarchical clustering tree, [multi-table hashing](https://github.com/fc731097343/efanna/tree/master/samples_hashing) and so on.   
 
 What's new
 -------
