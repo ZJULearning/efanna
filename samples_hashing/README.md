@@ -2,6 +2,7 @@ Search with Hash Index (and a kNN Graph)
 ============
 We provide here the codes for search with hash index (and a kNN graph). The codes are used in our paper [A Revisit of Hashing Algorithms for Approximate Nearest Neighbor Search](http://arxiv.org/abs/1612.07545).    
 Search with hash index together with a kNN graph actually is Iterative Expanding Hashing (IEH). It can be regarded as a special instance in the EFANNA framework.   
+You need a hash index for search. Please use the [matlab codes](https://github.com/dengcai78/MatlabFunc/tree/master/ANNS/Hashing) of various hashing algorithms to generate the hash index.
 
 Benchmark data set
 -------
