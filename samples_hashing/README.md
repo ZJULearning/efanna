@@ -9,7 +9,7 @@ Benchmark data set
 
 The performance was tested without parallelism.   
 
-ANN Search Using Hash Index
+ANN search using hash index
 ------
 
 ![SIFT100nn](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/sift.best.time.100nn.png)     
@@ -17,7 +17,7 @@ ANN Search Using Hash Index
 
 The number in parenthesis after the algorithm name is the optimal code length of this hashing algorithm on this dataset.
 
-ANN Search Using Hash Index and a kNN Graph (Iterative Expanding Hashing, IEH)
+ANN search using hash index and a kNN graph (Iterative Expanding Hashing, IEH)
 ------
 
 ![SIFT100nn](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/sift.IEH.time.100nn.png)     
