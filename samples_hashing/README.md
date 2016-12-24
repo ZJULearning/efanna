@@ -18,7 +18,7 @@ ANN search using hash index
 
 The number in parenthesis after the algorithm name is the optimal code length of this hashing algorithm on this dataset.
 
-ANN search using hash index and a kNN graph (Iterative Expanding Hashing, IEH)
+ANN search using hash index and a kNN graph (Iterative Expanding Hashing, IEH [1])
 ------
 
 ![SIFT100nn](http://www.cad.zju.edu.cn/home/dengcai/Data/Hashing/sift.IEH.time.100nn.png)     
@@ -85,3 +85,7 @@ To use Iterative Expanding Hashing (IEH), you need a kNN graph besides hash inde
 Output and Input format
 ------
 Same as that of [EFANNA](https://github.com/fc731097343/efanna)
+
+
+
+1. Zhongming Jin, Debing Zhang, Yao Hu, Shiding Lin, Deng Cai, Xiaofei He: Fast and Accurate Hashing Via Iterative Nearest Neighbors Expansion. IEEE Trans. Cybernetics 44(11): 2167-2177 (2014)
