@@ -1,7 +1,7 @@
 Search with Hash Index (and a kNN Graph)
 ============
 We provide here the codes for search with hash index (and a kNN graph). The codes are used in our paper [A Revisit of Hashing Algorithms for Approximate Nearest Neighbor Search](http://arxiv.org/abs/1612.07545).    
-Search with hash index together with a kNN graph actually is Iterative Expanding Hashing (IEH). It can be regarded as a special instance in the EFANNA framework.   
+Search with hash index together with a kNN graph actually is Iterative Expanding Hashing (IEH)[1]. It can be regarded as a special instance in the [EFANNA](https://github.com/fc731097343/efanna) framework.   
 You need a hash index for search. Please use the [matlab codes](https://github.com/dengcai78/MatlabFunc/tree/master/ANNS/Hashing) of various hashing algorithms to generate the hash index.
 
 Benchmark data set
@@ -51,7 +51,7 @@ You need a hash index for search. Please use the [matlab codes](https://github.c
 	sift.results -- path to save ANN search results of given query   
 	16 -- number of tables to use (you should provide 16 tables)   
 	32 -- code length of the hash table   
-	8  -- maximum radius (the algorithm will stop locate points beyond this radius number, using random points from the database to fill the initial pool)   
+	8  -- maximum radius (the algorithm will stop locating points beyond this radius number, using random points from the database to fill the initial pool)   
 	0  -- code length shift (the algorithm will actually use codelength - codelengthshift bits code, in this case, 32-0=32)   
 	10000 -- initial pool size factor    
 	100 -- required number of returned neighbors (i.e. k of k-NN)   
@@ -72,14 +72,14 @@ To use Iterative Expanding Hashing (IEH), you need a kNN graph besides hash inde
 	sift.results -- path to save ANN search results of given query   
 	16 -- number of tables to use (you should provide 16 tables)   
 	32 -- code length of the hash table   
-	8  -- maximum radius (the algorithm will stop locate points beyond this radius number, using random points from the database to fill the initial pool)   
+	8  -- maximum radius (the algorithm will stop locating points beyond this radius number, using random points from the database to fill the initial pool)   
 	0  -- code length shift (the algorithm will actually use codelength - codelengthshift bits code, in this case, 32-0=32)   
   200 -- initial pool size factor    
 	100 -- required number of returned neighbors (i.e. k of k-NN)   
 	sift.graph -- prebuilt kNN graph   
 	6 -- number of epoches   
 	100 -- extend factor (larger is more accurate but slower)   
-	1 -- searching methods (0~1, two kinds of algrothms, different performance on k-NN graph of different k)   
+	1 -- searching methods (0~1, two kinds of kNN graph expansion algorithms)   
 
 
 Output and Input format
