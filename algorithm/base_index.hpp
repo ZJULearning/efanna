@@ -11,6 +11,7 @@
 #include <unordered_set>
 #include <mutex>
 #include "boost/smart_ptr/detail/spinlock.hpp"
+#include <memory>
 
 
 
@@ -60,7 +61,7 @@ namespace efanna{
         return i;
     }
   struct Neighbor {
-        Lock lock;
+        std::shared_ptr<Lock> lock;
         float radius;
         float radiusM;
         Points pool;
@@ -71,9 +72,14 @@ namespace efanna{
         std::vector<unsigned> nn_new;
         std::vector<unsigned> rnn_old;
         std::vector<unsigned> rnn_new;
+
+        Neighbor() : lock(std::make_shared<Lock>())
+        {
+        }
+
         unsigned insert (unsigned id, float dist) {
             if (dist > radius) return pool.size();
-            LockGuard guard(lock);
+            LockGuard guard(*lock);
             unsigned l = InsertIntoKnn(&pool[0], L, Point(id, dist, true));
             if (l <= L) {
                 if (L + 1 < pool.size()) {
@@ -398,7 +404,7 @@ SearchParams SP;
               if (nn.flag) {
                   nn_new.push_back(nn.id);
                   if (nn.dist > nhood_o.radiusM) {
-                      LockGuard guard(nhood_o.lock);
+                      LockGuard guard(*nhood_o.lock);
                       nhood_o.rnn_new.push_back(n);
                   }
                   nn.flag = false;
@@ -406,7 +412,7 @@ SearchParams SP;
               else {
                   nn_old.push_back(nn.id);
                   if (nn.dist > nhood_o.radiusM) {
-                      LockGuard guard(nhood_o.lock);
+                      LockGuard guard(*nhood_o.lock);
                       nhood_o.rnn_old.push_back(n);
                   }
               }
