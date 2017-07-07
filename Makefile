@@ -2,7 +2,7 @@ GXX=g++ -std=c++11
 #OPTM=-O3 -msse2 -msse4 -fopenmp
 OPTM=-O3 -march=native -fopenmp
 CPFLAGS=$(OPTM) -Wall -DINFO
-LDFLAGS=$(OPTM) -Wall -lboost_timer -lboost_system -DINFO
+LDFLAGS=$(OPTM) -Wall -lboost_timer -lboost_chrono -lboost_system -DINFO
 
 INCLUDES=-I./ -I./algorithm -I./general
 
@@ -22,7 +22,7 @@ all: $(SHARED_LIB) $(SAMPLES)
 #	$(GXX) $(LDFLAGS) $(LIBS) $(OBJS) -shared -o $(SHARED_LIB)
 
 $(SAMPLES): %: %.o
-	$(GXX) $(LDFLAGS) $(LIBS) $^ -o $@
+	$(GXX) $^ -o $@ $(LDFLAGS) $(LIBS)
 
 %.o: %.cpp $(HEADERS)
 	$(GXX) $(CPFLAGS) $(INCLUDES) -c $*.cpp -o $@

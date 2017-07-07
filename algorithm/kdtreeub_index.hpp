@@ -1048,7 +1048,7 @@ public:
 					DataType dist = distance_->compare(
 							features_.get_row(tmpfea), features_.get_row(feature_id), features_.get_cols());
 
-					{LockGuard g(nhoods[tmpfea].lock);
+					{LockGuard g(*nhoods[tmpfea].lock);
 					if(knn_graph[tmpfea].size() < params_.S || dist < knn_graph[tmpfea].begin()->distance){
 						Candidate<DataType> c1(feature_id, dist);
 						knn_graph[tmpfea].insert(c1);
@@ -1062,7 +1062,7 @@ public:
 
 					}
 					}
-					{LockGuard g(nhoods[feature_id].lock);
+					{LockGuard g(*nhoods[feature_id].lock);
 					if(knn_graph[feature_id].size() < params_.S || dist < knn_graph[feature_id].begin()->distance){
 						Candidate<DataType> c1(tmpfea, dist);
 						knn_graph[feature_id].insert(c1);
