@@ -19,7 +19,7 @@ void load_data(char* filename, float*& data, size_t& num,int& dim){// load data 
   num = fsize / (dim+1) / 4;
   int cols = (dim + 7)/8*8;
   data = (float*)memalign(KGRAPH_MATRIX_ALIGN, num * cols * sizeof(float));
-if(dim!=cols)cout<<"data align to dimension "<<cols<<" for sse2 inst"<<endl;
+if(dim!=cols)cout<<"data align to dimension "<<cols<<" for avx2 inst"<<endl;
 
   in.seekg(0,ios::beg);
   for(size_t i = 0; i < num; i++){
@@ -53,13 +53,13 @@ int main(int argc, char** argv){
   int search_method = argc == 12 ? atoi(argv[11]) : 0;
   index.setSearchParams(search_epoc, poolsz, search_extend, search_trees, search_method);
 
-  
+
 //clock_t s,f;
 boost::timer::auto_cpu_timer timer;
 //s=clock();
   index.knnSearch(atoi(argv[10])/*query nn*/,query);
 //f=clock();
-  
+
 //cout<<(f-s)*1.0/CLOCKS_PER_SEC/8<<endl;
 cout<<timer.elapsed().wall / 1e9<<endl;
   index.saveResults(argv[5]);

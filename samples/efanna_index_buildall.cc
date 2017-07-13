@@ -15,9 +15,9 @@ void load_data(char* filename, float*& data, size_t& num,int& dim){// load data 
   ios::pos_type ss = in.tellg();
   size_t fsize = (size_t)ss;
   num = fsize / (dim+1) / 4;
-  int cols = (dim + 3)/4*4;
+  int cols = (dim + 7)/8*8;
   data = (float*)memalign(KGRAPH_MATRIX_ALIGN, num * cols * sizeof(float));
-if(dim!=cols)cout<<"data align to dimension "<<cols<<" for sse2 inst"<<endl;
+if(dim!=cols)cout<<"data align to dimension "<<cols<<" for avx2 inst"<<endl;
 
   in.seekg(0,ios::beg);
   for(size_t i = 0; i < num; i++){
@@ -47,7 +47,7 @@ int main(int argc, char** argv){
   int checkK = atoi(argv[8]);
   int kNN = atoi(argv[9]);
   int S = atoi(argv[10]);
-  
+
   //srand(time(NULL));
   FIndex<float> index(dataset, new L2DistanceAVX<float>(), efanna::KDTreeUbIndexParams(true, trees ,mlevel ,epochs,checkK,L, kNN, trees, S));
   clock_t s,f;
