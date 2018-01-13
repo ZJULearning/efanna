@@ -6,6 +6,7 @@ EFANNA is also flexible to adopt all kinds of hierarchical structure for initial
 
 What's new
 -------
++ **Please see our more advanced search algorithm [NSG](https://github.com/ZJULearning/nsg)**   Jan 13, 2018
 + **The [paper](http://arxiv.org/abs/1609.07228) updated significantly.**   Dec 6, 2016
 + **Algorithm improved and AVX instructions supported.**  Nov 30, 2016   
 + **Parallelism with OpenMP.**  Sep 26, 2016  
