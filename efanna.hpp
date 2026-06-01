@@ -1,4 +1,4 @@
-// Copyright (C) 2016 Cong Fu <731097343@qq.com>. All Rights Reserved.
+// Copyright (C) 2016 Cong Fu <fc731097343@gmail.com>. All Rights Reserved.
 #ifndef EFANNA
 #define EFANNA
 #include "general/distance.hpp"
